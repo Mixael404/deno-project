@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administration — De Montfort Programmes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="header" id="header" role="banner">
+    <div class="container header__inner">
+      <a href="/" class="header__brand" aria-label="De Montfort Programmes — home">
+        De Montfort <strong>Programmes</strong>
+      </a>
+      <div class="header__actions">
+        <button class="btn btn--ghost" id="auth-btn" aria-haspopup="dialog" hidden>Login</button>
+        <a href="/admin" class="btn btn--ghost btn--sm" id="admin-btn" hidden>Admin</a>
+        <a href="/profile" class="avatar-btn" id="avatar-btn" aria-label="Go to profile" hidden>
+          <span class="avatar" id="user-avatar" aria-hidden="true"></span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="admin-main">
+    <div class="container">
+
+      <div class="admin-page-header">
+        <div>
+          <h1 class="admin-page-title">Administration</h1>
+          <p class="admin-page-subtitle">Manage users and platform data.</p>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" id="stats-grid" aria-label="Platform statistics">
+        <div class="stat-card">
+          <span class="stat-card__value" id="stat-total">—</span>
+          <span class="stat-card__label">Total Users</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__value" id="stat-students">—</span>
+          <span class="stat-card__label">Students</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__value" id="stat-admins">—</span>
+          <span class="stat-card__label">Admins</span>
+        </div>
+      </div>
+
+      <!-- Users table -->
+      <section class="admin-section" aria-labelledby="users-heading">
+        <div class="admin-section__header">
+          <h2 class="admin-section__title" id="users-heading">Users</h2>
+          <div class="admin-section__tools">
+            <label for="user-search" class="sr-only">Search users</label>
+            <div class="filters__search-wrap admin-search-wrap">
+              <svg class="filters__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.75" fill="none"/>
+                <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              </svg>
+              <input
+                type="search"
+                id="user-search"
+                class="input input--search input--sm"
+                placeholder="Search by name or email…"
+                autocomplete="off"
+                aria-controls="users-table-body"
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="data-table-wrap" role="region" aria-label="Users table" tabindex="0">
+          <table class="data-table" id="users-table">
+            <thead>
+              <tr>
+                <th scope="col">User</th>
+                <th scope="col">Email</th>
+                <th scope="col">Role</th>
+                <th scope="col">Member Since</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body">
+              <tr class="data-table__loading">
+                <td colspan="4" aria-live="polite">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="admin-empty" id="users-empty" hidden>No users found.</p>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="container footer__inner">
+      <span class="footer__brand">De Montfort Programmes</span>
+      <span class="footer__copy">© 2026 All rights reserved.</span>
+    </div>
+  </footer>
+
+  <script src="/js/auth-state.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

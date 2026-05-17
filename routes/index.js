@@ -1,6 +1,7 @@
-import { pageController } from "../controllers/pageController.js";
-import { authController } from "../controllers/authController.js";
-import { serveStatic }    from "../utils/serveStatic.js";
+import { pageController }  from "../controllers/pageController.js";
+import { authController }  from "../controllers/authController.js";
+import { adminController } from "../controllers/adminController.js";
+import { serveStatic }     from "../utils/serveStatic.js";
 
 const STATIC_PREFIXES = ["/css/", "/js/", "/uploads/", "/fonts/"];
 
@@ -8,6 +9,11 @@ const GET_ROUTES = {
   "/":        pageController.home,
   "/about":   pageController.about,
   "/profile": pageController.profile,
+  "/admin":   pageController.admin,
+};
+
+const GET_API_ROUTES = {
+  "/api/admin/users": adminController.getUsers,
 };
 
 const POST_ROUTES = {
@@ -24,6 +30,9 @@ export async function router(req) {
     if (STATIC_PREFIXES.some((p) => url.pathname.startsWith(p))) {
       return serveStatic(url.pathname);
     }
+    const apiHandler = GET_API_ROUTES[url.pathname];
+    if (apiHandler) return apiHandler(req);
+
     const handler = GET_ROUTES[url.pathname];
     return handler
       ? handler(req)

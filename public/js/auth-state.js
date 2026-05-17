@@ -39,6 +39,7 @@
     const user      = getUser();
     const authBtn   = document.getElementById("auth-btn");
     const avatarBtn = document.getElementById("avatar-btn");
+    const adminBtn  = document.getElementById("admin-btn");
     const avatar    = document.getElementById("user-avatar");
 
     const initials = user ? getInitials(user) : "";
@@ -47,9 +48,12 @@
       authBtn?.setAttribute("hidden", "");
       avatarBtn?.removeAttribute("hidden");
       if (avatar) avatar.textContent = initials;
+      if (user.role === "ADMIN") adminBtn?.removeAttribute("hidden");
+      else adminBtn?.setAttribute("hidden", "");
     } else {
       authBtn?.removeAttribute("hidden");
       avatarBtn?.setAttribute("hidden", "");
+      adminBtn?.setAttribute("hidden", "");
       if (!user) clearUser();
     }
   }
