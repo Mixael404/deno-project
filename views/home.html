@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore undergraduate and postgraduate programmes at De Montfort — designed to build the careers that shape tomorrow.">
+  <title>De Montfort Programmes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+  <header class="header" id="header" role="banner">
+    <div class="container header__inner">
+      <a href="/" class="header__brand" aria-label="De Montfort Programmes — home">
+        De Montfort <strong>Programmes</strong>
+      </a>
+      <button class="btn btn--ghost" id="auth-btn" aria-haspopup="dialog">Login</button>
+    </div>
+  </header>
+
+  <!-- ════════════════════════════ HERO ════════════════════════════ -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero__orb hero__orb--1" aria-hidden="true"></div>
+    <div class="hero__orb hero__orb--2" aria-hidden="true"></div>
+
+    <div class="container hero__inner">
+      <div class="hero__content">
+        <p class="hero__eyebrow">
+          <span class="hero__eyebrow-line" aria-hidden="true"></span>
+          University Programmes
+        </p>
+        <h1 class="hero__title" id="hero-title">
+          Find the programme<br>
+          <em>built for your future.</em>
+        </h1>
+        <p class="hero__description">
+          Explore our portfolio of undergraduate and postgraduate programmes —
+          designed to challenge your thinking, sharpen your expertise,
+          and launch careers that matter.
+        </p>
+        <a href="#programmes" class="btn btn--primary hero__cta" id="browse-btn">
+          Browse Programmes
+          <svg class="btn__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 5v14M5 12l7 7 7-7" stroke="currentColor" stroke-width="2.25"
+                  stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="hero__stats" aria-label="Key statistics">
+        <div class="hero__stat">
+          <span class="hero__stat-number" aria-hidden="true">20+</span>
+          <span class="hero__stat-label">
+            <span class="sr-only">More than 20</span> Programmes
+          </span>
+        </div>
+        <div class="hero__stat-divider" aria-hidden="true"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-number" aria-hidden="true">95%</span>
+          <span class="hero__stat-label">
+            <span class="sr-only">95 percent</span> Graduate employment
+          </span>
+        </div>
+        <div class="hero__stat-divider" aria-hidden="true"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-number" aria-hidden="true">40+</span>
+          <span class="hero__stat-label">
+            <span class="sr-only">More than 40</span> Industry partners
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════ MAIN CONTENT ══════════════════════════ -->
+  <main id="main">
+    <section id="programmes" class="programmes-section" aria-labelledby="programmes-title">
+      <div class="container">
+
+        <header class="section-header">
+          <h2 class="section-title" id="programmes-title">Our Programmes</h2>
+          <p class="section-subtitle">Choose the level and field that fits your ambitions.</p>
+        </header>
+
+        <!-- Filters -->
+        <div class="filters" role="search" aria-label="Filter programmes">
+          <div class="filters__search-wrap">
+            <label for="search-input" class="sr-only">Search programmes by title or keyword</label>
+            <svg class="filters__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.75" fill="none"/>
+              <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+            </svg>
+            <input
+              type="search"
+              id="search-input"
+              class="input input--search"
+              placeholder="Search by title or keyword…"
+              autocomplete="off"
+              aria-controls="programme-list"
+              aria-label="Search programmes"
+            >
+          </div>
+          <div class="filters__select-wrap">
+            <label for="level-select" class="sr-only">Filter by level</label>
+            <select
+              id="level-select"
+              class="select"
+              aria-controls="programme-list"
+              aria-label="Filter by level"
+            >
+              <option value="ALL">All Levels</option>
+              <option value="UNDERGRADUATE">Undergraduate</option>
+              <option value="POSTGRADUATE">Postgraduate</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Live count -->
+        <p
+          class="programmes-count"
+          id="programmes-count"
+          aria-live="polite"
+          aria-atomic="true"
+        ></p>
+
+        <!-- Programme list -->
+        <ul
+          class="programme-list"
+          id="programme-list"
+          role="list"
+          aria-label="Available programmes"
+        ></ul>
+
+        <!-- Empty state -->
+        <p class="programmes-empty" id="programmes-empty" hidden>
+          No programmes match your search. Try adjusting your filters.
+        </p>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ══════════════════════════ MODAL ══════════════════════════ -->
+  <div
+    class="modal-backdrop"
+    id="modal-backdrop"
+    aria-hidden="true"
+    role="presentation"
+  >
+    <div
+      class="modal"
+      id="contact-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      aria-describedby="modal-programme"
+      tabindex="-1"
+    >
+      <button class="modal__close" id="modal-close" aria-label="Close dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="modal__header">
+        <h2 class="modal__title" id="modal-title">Register Your Interest</h2>
+        <p class="modal__programme" id="modal-programme"></p>
+      </div>
+
+      <form class="modal__form" id="contact-form" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="field-first-name">
+              First Name <span class="form-required" aria-label="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="field-first-name"
+              name="firstName"
+              class="input"
+              autocomplete="given-name"
+              required
+              aria-required="true"
+            >
+            <span class="form-error" id="error-first-name" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="field-last-name">
+              Last Name <span class="form-required" aria-label="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="field-last-name"
+              name="lastName"
+              class="input"
+              autocomplete="family-name"
+              required
+              aria-required="true"
+            >
+            <span class="form-error" id="error-last-name" role="alert" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="field-email">
+            Email Address <span class="form-required" aria-label="required">*</span>
+          </label>
+          <input
+            type="email"
+            id="field-email"
+            name="email"
+            class="input"
+            autocomplete="email"
+            required
+            aria-required="true"
+          >
+          <span class="form-error" id="error-email" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="field-phone">
+            Phone
+            <span class="form-optional">(optional)</span>
+          </label>
+          <input
+            type="tel"
+            id="field-phone"
+            name="phone"
+            class="input"
+            autocomplete="tel"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="field-message">
+            Message
+            <span class="form-optional">(optional)</span>
+          </label>
+          <textarea
+            id="field-message"
+            name="message"
+            class="textarea"
+            rows="3"
+            placeholder="Tell us why you're interested…"
+          ></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary btn--full">
+            Submit Application
+          </button>
+        </div>
+
+        <p class="form-notice">
+          By submitting this form you agree to be contacted about this programme.
+          You may withdraw your interest at any time.
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════ AUTH MODAL ══════════════════════════ -->
+  <div
+    class="modal-backdrop"
+    id="auth-backdrop"
+    aria-hidden="true"
+    role="presentation"
+  >
+    <div
+      class="modal"
+      id="auth-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="auth-title"
+      tabindex="-1"
+    >
+      <button class="modal__close" id="auth-modal-close" aria-label="Close dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <!-- ── Login view ── -->
+      <div class="auth-view" id="auth-view-login">
+        <div class="modal__header">
+          <h2 class="modal__title" id="auth-title">Sign In</h2>
+          <p class="modal__programme">Welcome back. Enter your credentials below.</p>
+        </div>
+        <form class="modal__form" id="login-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="login-email">
+              Email Address <span class="form-required" aria-label="required">*</span>
+            </label>
+            <input type="email" id="login-email" name="email" class="input"
+                   autocomplete="email" required aria-required="true">
+            <span class="form-error" id="login-error-email" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">
+              Password <span class="form-required" aria-label="required">*</span>
+            </label>
+            <input type="password" id="login-password" name="password" class="input"
+                   autocomplete="current-password" required aria-required="true">
+            <span class="form-error" id="login-error-password" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary btn--full">Sign In</button>
+          </div>
+          <p class="auth-switch">
+            Don't have an account?
+            <button type="button" class="auth-switch__btn" id="go-to-register">Create one</button>
+          </p>
+        </form>
+      </div>
+
+      <!-- ── Register view ── -->
+      <div class="auth-view auth-view--hidden" id="auth-view-register" aria-hidden="true">
+        <div class="modal__header">
+          <h2 class="modal__title">Create Account</h2>
+          <p class="modal__programme">Join De Montfort Programmes today.</p>
+        </div>
+        <form class="modal__form" id="register-form" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="reg-first-name">
+                First Name <span class="form-required" aria-label="required">*</span>
+              </label>
+              <input type="text" id="reg-first-name" name="firstName" class="input"
+                     autocomplete="given-name" required aria-required="true">
+              <span class="form-error" id="reg-error-first-name" role="alert" aria-live="polite"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-last-name">
+                Last Name <span class="form-required" aria-label="required">*</span>
+              </label>
+              <input type="text" id="reg-last-name" name="lastName" class="input"
+                     autocomplete="family-name" required aria-required="true">
+              <span class="form-error" id="reg-error-last-name" role="alert" aria-live="polite"></span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-email">
+              Email Address <span class="form-required" aria-label="required">*</span>
+            </label>
+            <input type="email" id="reg-email" name="email" class="input"
+                   autocomplete="email" required aria-required="true">
+            <span class="form-error" id="reg-error-email" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-password">
+              Password <span class="form-required" aria-label="required">*</span>
+            </label>
+            <input type="password" id="reg-password" name="password" class="input"
+                   autocomplete="new-password" required aria-required="true">
+            <span class="form-error" id="reg-error-password" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-phone">
+              Phone <span class="form-optional">(optional)</span>
+            </label>
+            <input type="tel" id="reg-phone" name="phone" class="input" autocomplete="tel">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary btn--full">Create Account</button>
+          </div>
+          <p class="auth-switch">
+            Already have an account?
+            <button type="button" class="auth-switch__btn" id="go-to-login">Sign in</button>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ FOOTER ════════════════════════ -->
+  <footer class="footer" role="contentinfo">
+    <div class="container footer__inner">
+      <span class="footer__brand">De Montfort Programmes</span>
+      <span class="footer__copy">© 2025 All rights reserved.</span>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>
