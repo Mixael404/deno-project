@@ -1,28 +1,41 @@
 import { pageController } from "../controllers/pageController.js";
-import { serveStatic } from "../utils/serveStatic.js";
+import { authController } from "../controllers/authController.js";
+import { serveStatic }    from "../utils/serveStatic.js";
 
-const routes = {
-  "/": pageController.home,
-  "/about": pageController.about,
+const STATIC_PREFIXES = ["/css/", "/js/", "/uploads/", "/fonts/"];
+
+const GET_ROUTES = {
+  "/":        pageController.home,
+  "/about":   pageController.about,
+  "/profile": pageController.profile,
+};
+
+const POST_ROUTES = {
+  "/api/auth/register": authController.register,
+  "/api/auth/login":    authController.login,
+  "/api/auth/refresh":  authController.refresh,
+  "/api/auth/logout":   authController.logout,
 };
 
 export async function router(req) {
-  if (req.method !== "GET") {
-    return new Response("Method Not Allowed", { status: 405 });
-  }
-
   const url = new URL(req.url);
 
-  const STATIC = ["/css/", "/js/", "/uploads/", "/fonts/"];
-  if (STATIC.some(p => url.pathname.startsWith(p))) {
-    return serveStatic(url.pathname);
+  if (req.method === "GET") {
+    if (STATIC_PREFIXES.some((p) => url.pathname.startsWith(p))) {
+      return serveStatic(url.pathname);
+    }
+    const handler = GET_ROUTES[url.pathname];
+    return handler
+      ? handler(req)
+      : new Response("404 — Page Not Found", { status: 404 });
   }
 
-  const handler = routes[url.pathname];
-
-  if (!handler) {
-    return new Response("404 — Page Not Found", { status: 404 });
+  if (req.method === "POST") {
+    const handler = POST_ROUTES[url.pathname];
+    return handler
+      ? handler(req)
+      : Response.json({ error: "Not Found" }, { status: 404 });
   }
 
-  return await handler(req);
+  return new Response("Method Not Allowed", { status: 405 });
 }

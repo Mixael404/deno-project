@@ -90,4 +90,13 @@ db.exec(`
 
     UNIQUE(user_id, programme_id)
   );
+
+  CREATE TABLE IF NOT EXISTS sessions (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    refresh_token TEXT    NOT NULL UNIQUE,
+    expires_at    TEXT    NOT NULL,
+    created_at    TEXT    NOT NULL,
+    updated_at    TEXT    NOT NULL
+  );
 `);

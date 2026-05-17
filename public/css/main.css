@@ -3,6 +3,9 @@
    Fonts: Cormorant Garamond (display) · Outfit (body)
    ================================================================ */
 
+/* ── 0. RESET HELPERS ─────────────────────────────────────────── */
+[hidden] { display: none !important; }
+
 /* ── 1. CUSTOM PROPERTIES ─────────────────────────────────────── */
 :root {
   /* Palette */
@@ -256,6 +259,173 @@ ul, ol    { list-style: none; }
 .header__brand strong {
   font-weight: 600;
   color: var(--white);
+}
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Avatar button */
+.avatar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: transform var(--dur) var(--ease-spring);
+  text-decoration: none;
+}
+.avatar-btn:hover  { transform: scale(1.08); }
+.avatar-btn:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 50%;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--navy);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 2px solid rgba(255,255,255,0.25);
+  user-select: none;
+  transition: border-color var(--dur) var(--ease);
+}
+.avatar-btn:hover .avatar { border-color: rgba(255,255,255,0.6); }
+
+/* Large avatar for profile page */
+.profile-avatar-lg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--navy);
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+/* ── PROFILE PAGE ─────────────────────────────────────────────── */
+.profile-main {
+  padding-block: clamp(3rem, 8vw, 5rem);
+  min-height: calc(100dvh - 3.8125rem - 5rem);
+}
+
+.profile-card {
+  background: var(--white);
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: clamp(1.75rem, 4vw, 2.5rem);
+  max-width: 36rem;
+}
+
+.profile-card__header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1.5px solid var(--border-light);
+}
+
+.profile-card__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-card__name {
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.badge--role {
+  background: var(--gold-pale);
+  color: #7A5E10;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  width: fit-content;
+}
+
+.profile-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.profile-field {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.profile-field__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.profile-field__value {
+  font-size: 0.9375rem;
+  color: var(--text);
+  font-weight: 400;
+}
+
+.profile-card__actions { display: flex; justify-content: flex-start; }
+
+.btn--logout {
+  background: transparent;
+  color: #C0392B;
+  border: 1.5px solid rgba(192,57,43,0.3);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: var(--radius);
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.btn--logout:hover {
+  background: rgba(192,57,43,0.06);
+  border-color: #C0392B;
+}
+.btn--logout:focus-visible {
+  outline: 3px solid #C0392B;
+  outline-offset: 3px;
+}
+
+@media (max-width: 36em) {
+  .profile-field { grid-template-columns: 1fr; gap: 0.125rem; }
 }
 
 /* ── 7. HERO ──────────────────────────────────────────────────── */

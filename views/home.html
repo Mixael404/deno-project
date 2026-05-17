@@ -20,7 +20,12 @@
       <a href="/" class="header__brand" aria-label="De Montfort Programmes — home">
         De Montfort <strong>Programmes</strong>
       </a>
-      <button class="btn btn--ghost" id="auth-btn" aria-haspopup="dialog">Login</button>
+      <div class="header__actions">
+        <button class="btn btn--ghost" id="auth-btn" aria-haspopup="dialog" hidden>Login</button>
+        <a href="/profile" class="avatar-btn" id="avatar-btn" aria-label="Go to profile" hidden>
+          <span class="avatar" id="user-avatar" aria-hidden="true"></span>
+        </a>
+      </div>
     </div>
   </header>
 
@@ -386,6 +391,7 @@
     </div>
   </footer>
 
-  <script src="/js/main.js"></script>
+  <script src="/js/auth-state.js"></script>
+  <script src="/js/main.js" defer></script>
 </body>
 </html>

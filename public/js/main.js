@@ -461,20 +461,58 @@ document.getElementById("go-to-login").addEventListener("click", () => {
   switchAuthView("auth-view-login", "auth-view-register");
 });
 
+/* ── Auth form submissions ── */
+async function submitAuthForm(endpoint, data, submitBtn) {
+  const original = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Please wait…";
+
+  try {
+    const res = await fetch(endpoint, {
+      method:      "POST",
+      credentials: "include",
+      headers:     { "Content-Type": "application/json" },
+      body:        JSON.stringify(data),
+    });
+    const json = await res.json();
+
+    if (!res.ok) {
+      /* Show server error inside the modal */
+      const errorBanner = authModal.querySelector(".auth-server-error") ?? (() => {
+        const el = document.createElement("p");
+        el.className = "auth-server-error form-error";
+        el.style.textAlign = "center";
+        el.style.marginBottom = "0.75rem";
+        authModal.querySelector("form:not([hidden])").prepend(el);
+        return el;
+      })();
+      errorBanner.textContent = json.error ?? "Something went wrong.";
+      return;
+    }
+
+    /* Success — persist user, update header, close modal */
+    localStorage.setItem("dmp_user", JSON.stringify(json.user));
+    closeAuthModal();
+    window.location.reload(); /* reload so header re-renders with avatar */
+
+  } catch {
+    alert("Network error. Please try again.");
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = original;
+  }
+}
+
 document.getElementById("login-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(e.target));
-  /* TODO: POST /api/auth/login */
-  console.log("Login:", data);
-  closeAuthModal();
+  submitAuthForm("/api/auth/login", data, e.target.querySelector("[type=submit]"));
 });
 
 document.getElementById("register-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(e.target));
-  /* TODO: POST /api/auth/register */
-  console.log("Register:", data);
-  closeAuthModal();
+  submitAuthForm("/api/auth/register", data, e.target.querySelector("[type=submit]"));
 });
 
 /* ══════════════════════════════════════════════════════

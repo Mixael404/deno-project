@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile — De Montfort Programmes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="header" id="header" role="banner">
+    <div class="container header__inner">
+      <a href="/" class="header__brand" aria-label="De Montfort Programmes — home">
+        De Montfort <strong>Programmes</strong>
+      </a>
+      <div class="header__actions">
+        <button class="btn btn--ghost" id="auth-btn" aria-haspopup="dialog" hidden>Login</button>
+        <a href="/profile" class="avatar-btn" id="avatar-btn" aria-label="Go to profile" hidden>
+          <span class="avatar" id="user-avatar" aria-hidden="true"></span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="profile-main">
+    <div class="container">
+      <div class="profile-card">
+
+        <div class="profile-card__header">
+          <div class="profile-avatar-lg" id="profile-avatar-lg" aria-hidden="true"></div>
+          <div class="profile-card__title-group">
+            <h1 class="profile-card__name" id="profile-name"></h1>
+            <span class="badge badge--role" id="profile-role"></span>
+          </div>
+        </div>
+
+        <dl class="profile-fields">
+          <div class="profile-field">
+            <dt class="profile-field__label">Email</dt>
+            <dd class="profile-field__value" id="profile-email"></dd>
+          </div>
+          <div class="profile-field" id="profile-phone-row" hidden>
+            <dt class="profile-field__label">Phone</dt>
+            <dd class="profile-field__value" id="profile-phone"></dd>
+          </div>
+          <div class="profile-field">
+            <dt class="profile-field__label">Member since</dt>
+            <dd class="profile-field__value" id="profile-created"></dd>
+          </div>
+        </dl>
+
+        <div class="profile-card__actions">
+          <button class="btn btn--logout" id="logout-btn">
+            <svg class="btn__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            Sign Out
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="container footer__inner">
+      <span class="footer__brand">De Montfort Programmes</span>
+      <span class="footer__copy">© 2025 All rights reserved.</span>
+    </div>
+  </footer>
+
+  <script src="/js/auth-state.js"></script>
+  <script src="/js/profile.js"></script>
+</body>
+</html>
