@@ -2,6 +2,52 @@ import { db } from "../db/client.js";
 import { now, deserialize, applyUpdate } from "../db/utils.js";
 
 export const programmeModel = {
+  findPublished({ search = "", level = "" } = {}) {
+    const conds  = ["p.is_published = 1"];
+    const params = [];
+
+    if (level === "UNDERGRADUATE" || level === "POSTGRADUATE") {
+      conds.push("p.level = ?");
+      params.push(level);
+    }
+    if (search) {
+      const like = `%${search.toLowerCase()}%`;
+      conds.push(`(
+        LOWER(p.title) LIKE ?
+        OR LOWER(p.short_description) LIKE ?
+        OR LOWER(p.description) LIKE ?
+        OR EXISTS (
+          SELECT 1 FROM modules m2
+          JOIN programme_modules pm2 ON pm2.module_id = m2.id
+          WHERE pm2.programme_id = p.id AND LOWER(m2.title) LIKE ?
+        )
+      )`);
+      params.push(like, like, like, like);
+    }
+
+    const sql = `SELECT p.* FROM programmes p WHERE ${conds.join(" AND ")} ORDER BY p.title`;
+    const programmes = db.prepare(sql).all(...params).map(deserialize);
+
+    const moduleStmt = db.prepare(`
+      SELECT m.id, m.title, m.image_url, m.short_description
+      FROM modules m
+      JOIN programme_modules pm ON pm.module_id = m.id
+      WHERE pm.programme_id = ?
+      ORDER BY pm.year, pm.sort_order
+    `);
+    const staffStmt = db.prepare(
+      "SELECT id, first_name, last_name, position, image_url FROM staff_members WHERE id = ?"
+    );
+
+    for (const p of programmes) {
+      p.modules = moduleStmt.all(p.id).map(deserialize);
+      p.leader  = p.programmeLeaderId
+        ? (deserialize(staffStmt.get(p.programmeLeaderId)) ?? null)
+        : null;
+    }
+    return programmes;
+  },
+
   findAll({ publishedOnly = false } = {}) {
     const sql = publishedOnly
       ? "SELECT * FROM programmes WHERE is_published = 1 ORDER BY title"

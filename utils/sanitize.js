@@ -49,3 +49,25 @@ export function sanitizePassword(value) {
 export function isValidEmail(value) {
   return typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
+
+// Only allows http/https URLs to prevent javascript: injection.
+export function sanitizeUrl(value) {
+  if (value == null) return null;
+  const s = String(value).trim().slice(0, 500);
+  if (!s) return null;
+  if (!/^https?:\/\//i.test(s)) return null;
+  return s;
+}
+
+// Accepts server-generated /uploads/ paths and external https:// URLs.
+// Used for image fields that may come from either the file uploader or an
+// external URL input.
+export function sanitizeImageSrc(value) {
+  if (value == null) return null;
+  const s = String(value).trim().slice(0, 500);
+  if (!s) return null;
+  if (/^https?:\/\//i.test(s)) return s;
+  // Only allow simple filenames under /uploads/ — no path traversal.
+  if (/^\/uploads\/[a-zA-Z0-9_.-]+\.(jpg|jpeg|png|webp)$/i.test(s)) return s;
+  return null;
+}

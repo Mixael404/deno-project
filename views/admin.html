@@ -34,7 +34,7 @@
       <div class="admin-page-header">
         <div>
           <h1 class="admin-page-title">Administration</h1>
-          <p class="admin-page-subtitle">Manage users and platform data.</p>
+          <p class="admin-page-subtitle">Manage users, staff, modules, and programmes.</p>
         </div>
       </div>
 
@@ -52,54 +52,551 @@
           <span class="stat-card__value" id="stat-admins">—</span>
           <span class="stat-card__label">Admins</span>
         </div>
+        <div class="stat-card">
+          <span class="stat-card__value" id="stat-staff">—</span>
+          <span class="stat-card__label">Staff Members</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__value" id="stat-modules">—</span>
+          <span class="stat-card__label">Modules</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__value" id="stat-programmes">—</span>
+          <span class="stat-card__label">Programmes</span>
+        </div>
       </div>
 
-      <!-- Users table -->
-      <section class="admin-section" aria-labelledby="users-heading">
-        <div class="admin-section__header">
-          <h2 class="admin-section__title" id="users-heading">Users</h2>
-          <div class="admin-section__tools">
-            <label for="user-search" class="sr-only">Search users</label>
-            <div class="filters__search-wrap admin-search-wrap">
-              <svg class="filters__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.75" fill="none"/>
-                <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-              </svg>
-              <input
-                type="search"
-                id="user-search"
-                class="input input--search input--sm"
-                placeholder="Search by name or email…"
-                autocomplete="off"
-                aria-controls="users-table-body"
-              >
+      <!-- Tab navigation -->
+      <nav class="admin-tabs" role="tablist" aria-label="Administration sections">
+        <button class="admin-tab-btn is-active" role="tab" aria-selected="true"
+          aria-controls="tab-users" id="tab-btn-users">Users</button>
+        <button class="admin-tab-btn" role="tab" aria-selected="false"
+          aria-controls="tab-staff" id="tab-btn-staff">Staff Members</button>
+        <button class="admin-tab-btn" role="tab" aria-selected="false"
+          aria-controls="tab-modules" id="tab-btn-modules">Modules</button>
+        <button class="admin-tab-btn" role="tab" aria-selected="false"
+          aria-controls="tab-programmes" id="tab-btn-programmes">Programmes</button>
+      </nav>
+
+      <!-- ── Tab: Users ────────────────────────────────────────── -->
+      <div id="tab-users" role="tabpanel" aria-labelledby="tab-btn-users">
+        <section class="admin-section" aria-labelledby="users-heading">
+          <div class="admin-section__header">
+            <h2 class="admin-section__title" id="users-heading">Users</h2>
+            <div class="admin-section__tools">
+              <label for="user-search" class="sr-only">Search users</label>
+              <div class="filters__search-wrap admin-search-wrap">
+                <svg class="filters__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.75" fill="none"/>
+                  <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                </svg>
+                <input type="search" id="user-search" class="input input--search input--sm"
+                  placeholder="Search by name or email…" autocomplete="off"
+                  aria-controls="users-table-body">
+              </div>
             </div>
+          </div>
+          <div class="data-table-wrap" role="region" aria-label="Users table" tabindex="0">
+            <table class="data-table" id="users-table">
+              <thead>
+                <tr>
+                  <th scope="col">User</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Role</th>
+                  <th scope="col" class="col-hide-mobile">Member Since</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <tr class="data-table__loading">
+                  <td colspan="4" aria-live="polite">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="admin-empty" id="users-empty" hidden>No users found.</p>
+        </section>
+      </div>
+
+      <!-- ── Tab: Staff Members ────────────────────────────────── -->
+      <div id="tab-staff" role="tabpanel" aria-labelledby="tab-btn-staff" hidden>
+        <section class="admin-section" aria-labelledby="staff-heading">
+          <div class="admin-section__header">
+            <h2 class="admin-section__title" id="staff-heading">Staff Members</h2>
+            <button class="btn btn--primary btn--sm" id="add-staff-btn" aria-haspopup="dialog">
+              <svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              Add Member
+            </button>
+          </div>
+          <div class="data-table-wrap" role="region" aria-label="Staff table" tabindex="0">
+            <table class="data-table" id="staff-table">
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col" class="col-hide-mobile">Email</th>
+                  <th scope="col">Position</th>
+                  <th scope="col" class="col-hide-mobile">Added</th>
+                  <th scope="col" class="col-actions"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody id="staff-table-body">
+                <tr class="data-table__loading">
+                  <td colspan="4" aria-live="polite">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="admin-empty" id="staff-empty" hidden>No staff members yet. Add the first one.</p>
+        </section>
+      </div>
+
+      <!-- ── Tab: Modules ──────────────────────────────────────── -->
+      <div id="tab-modules" role="tabpanel" aria-labelledby="tab-btn-modules" hidden>
+        <section class="admin-section" aria-labelledby="modules-heading">
+          <div class="admin-section__header">
+            <h2 class="admin-section__title" id="modules-heading">Modules</h2>
+            <button class="btn btn--primary btn--sm" id="add-module-btn" aria-haspopup="dialog">
+              <svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              Add Module
+            </button>
+          </div>
+          <div class="data-table-wrap" role="region" aria-label="Modules table" tabindex="0">
+            <table class="data-table" id="modules-table">
+              <thead>
+                <tr>
+                  <th scope="col">Title</th>
+                  <th scope="col" class="col-hide-mobile">Code</th>
+                  <th scope="col" class="col-hide-mobile">Leader</th>
+                  <th scope="col" class="col-hide-mobile">Added</th>
+                  <th scope="col" class="col-actions"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody id="modules-table-body">
+                <tr class="data-table__loading">
+                  <td colspan="4" aria-live="polite">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="admin-empty" id="modules-empty" hidden>No modules yet. Add the first one.</p>
+        </section>
+      </div>
+
+      <!-- ── Tab: Programmes ───────────────────────────────────── -->
+      <div id="tab-programmes" role="tabpanel" aria-labelledby="tab-btn-programmes" hidden>
+        <section class="admin-section" aria-labelledby="programmes-heading">
+          <div class="admin-section__header">
+            <h2 class="admin-section__title" id="programmes-heading">Programmes</h2>
+            <button class="btn btn--primary btn--sm" id="add-programme-btn" aria-haspopup="dialog">
+              <svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              Add Programme
+            </button>
+          </div>
+          <div class="data-table-wrap" role="region" aria-label="Programmes table" tabindex="0">
+            <table class="data-table" id="programmes-table">
+              <thead>
+                <tr>
+                  <th scope="col">Title</th>
+                  <th scope="col" class="col-hide-mobile">Level</th>
+                  <th scope="col" class="col-hide-mobile">Duration</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" class="col-actions"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody id="programmes-table-body">
+                <tr class="data-table__loading">
+                  <td colspan="4" aria-live="polite">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="admin-empty" id="programmes-empty" hidden>No programmes yet. Add the first one.</p>
+        </section>
+      </div>
+
+    </div><!-- /container -->
+  </main>
+
+  <!-- ════════════════════════════════════════════════════════════
+       MODAL: Add Staff Member
+       ════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="staff-modal-bd"
+    role="dialog" aria-modal="true" aria-labelledby="staff-modal-title" inert>
+    <div class="modal modal--wide">
+      <button class="modal__close" id="staff-modal-close" aria-label="Close dialog">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="modal__header">
+        <h2 class="modal__title" id="staff-modal-title">Add Staff Member</h2>
+      </div>
+
+      <p class="form-error--global" id="staff-form-error" role="alert"></p>
+
+      <form id="staff-form" novalidate autocomplete="off">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="staff-first-name">
+              First Name <span class="form-required" aria-hidden="true">*</span>
+            </label>
+            <input id="staff-first-name" type="text" class="input" name="firstName"
+              required maxlength="100" placeholder="Jane" autocomplete="off">
+            <span class="form-error" id="staff-fn-err" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="staff-last-name">
+              Last Name <span class="form-required" aria-hidden="true">*</span>
+            </label>
+            <input id="staff-last-name" type="text" class="input" name="lastName"
+              required maxlength="100" placeholder="Smith" autocomplete="off">
+            <span class="form-error" id="staff-ln-err" role="alert"></span>
           </div>
         </div>
 
-        <div class="data-table-wrap" role="region" aria-label="Users table" tabindex="0">
-          <table class="data-table" id="users-table">
-            <thead>
-              <tr>
-                <th scope="col">User</th>
-                <th scope="col">Email</th>
-                <th scope="col">Role</th>
-                <th scope="col">Member Since</th>
-              </tr>
-            </thead>
-            <tbody id="users-table-body">
-              <tr class="data-table__loading">
-                <td colspan="4" aria-live="polite">Loading…</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="form-group">
+          <label class="form-label" for="staff-email">
+            Email <span class="form-required" aria-hidden="true">*</span>
+          </label>
+          <input id="staff-email" type="email" class="input" name="email"
+            required maxlength="254" placeholder="j.smith@dmu.ac.uk" autocomplete="off">
+          <span class="form-error" id="staff-email-err" role="alert"></span>
         </div>
 
-        <p class="admin-empty" id="users-empty" hidden>No users found.</p>
-      </section>
+        <div class="form-group">
+          <label class="form-label" for="staff-position">
+            Position <span class="form-required" aria-hidden="true">*</span>
+          </label>
+          <input id="staff-position" type="text" class="input" name="position"
+            required maxlength="200" placeholder="e.g. Senior Lecturer" autocomplete="off">
+          <span class="form-error" id="staff-pos-err" role="alert"></span>
+        </div>
 
+        <div class="form-group">
+          <label class="form-label" for="staff-bio">
+            Biography <span class="form-optional">(optional)</span>
+          </label>
+          <textarea id="staff-bio" class="textarea" name="bio"
+            maxlength="2000" rows="3" placeholder="Short biography…"></textarea>
+        </div>
+
+        <div class="form-group">
+          <span class="form-label" id="staff-upload-label">
+            Photo <span class="form-optional">(optional)</span>
+          </span>
+          <div class="upload-area" id="staff-upload-area"
+            role="button" tabindex="0" aria-labelledby="staff-upload-label"
+            aria-describedby="staff-img-err">
+            <input type="file" id="staff-image-file" class="upload-input"
+              accept="image/jpeg,image/png,image/webp" tabindex="-1"
+              aria-label="Choose photo file">
+            <input type="hidden" id="staff-image-url" name="imageUrl">
+            <div class="upload-placeholder" id="staff-upload-ph" aria-hidden="true">
+              <svg class="upload-placeholder__icon" viewBox="0 0 24 24" fill="none">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"
+                  stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="upload-placeholder__label">Click to upload or drag &amp; drop</span>
+              <span class="upload-placeholder__hint">JPEG, PNG or WebP — max 5 MB</span>
+            </div>
+            <div class="upload-preview" id="staff-upload-preview" hidden>
+              <img id="staff-preview-img" src="" alt="Uploaded photo preview" class="upload-preview__img">
+              <button type="button" class="upload-preview__remove" id="staff-remove-img"
+                aria-label="Remove photo">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <div class="upload-spinner" id="staff-upload-spin" hidden>
+              <span class="upload-spinner__ring"></span>
+              <span>Uploading…</span>
+            </div>
+          </div>
+          <span class="form-error" id="staff-img-err" role="alert"></span>
+        </div>
+
+        <div class="admin-modal-footer">
+          <button type="button" class="btn btn--cancel" id="staff-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn--primary" id="staff-submit">Add Staff Member</button>
+        </div>
+      </form>
     </div>
-  </main>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════
+       MODAL: Add Module
+       ════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="module-modal-bd"
+    role="dialog" aria-modal="true" aria-labelledby="module-modal-title" inert>
+    <div class="modal modal--wide">
+      <button class="modal__close" id="module-modal-close" aria-label="Close dialog">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="modal__header">
+        <h2 class="modal__title" id="module-modal-title">Add Module</h2>
+      </div>
+
+      <p class="form-error--global" id="module-form-error" role="alert"></p>
+
+      <form id="module-form" novalidate autocomplete="off">
+        <div class="form-group">
+          <label class="form-label" for="mod-title">
+            Title <span class="form-required" aria-hidden="true">*</span>
+          </label>
+          <input id="mod-title" type="text" class="input" name="title"
+            required maxlength="200" placeholder="Introduction to Programming" autocomplete="off">
+          <span class="form-error" id="mod-title-err" role="alert"></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="mod-code">
+              Module Code <span class="form-optional">(optional)</span>
+            </label>
+            <input id="mod-code" type="text" class="input" name="code"
+              maxlength="20" placeholder="CS101" autocomplete="off">
+            <span class="form-error" id="mod-code-err" role="alert"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="mod-leader">
+              Module Leader <span class="form-optional">(optional)</span>
+            </label>
+            <select id="mod-leader" class="select" name="moduleLeaderId">
+              <option value="">— Select staff member —</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="mod-short-desc">
+            Short Description <span class="form-optional">(optional)</span>
+          </label>
+          <input id="mod-short-desc" type="text" class="input" name="shortDescription"
+            maxlength="500" placeholder="One-line summary visible in listings…" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="mod-desc">
+            Description <span class="form-required" aria-hidden="true">*</span>
+          </label>
+          <textarea id="mod-desc" class="textarea" name="description"
+            required maxlength="5000" rows="4"
+            placeholder="Full module description, learning outcomes, topics covered…"></textarea>
+          <span class="form-error" id="mod-desc-err" role="alert"></span>
+        </div>
+
+        <div class="form-group">
+          <span class="form-label" id="mod-upload-label">
+            Image <span class="form-optional">(optional)</span>
+          </span>
+          <div class="upload-area" id="mod-upload-area"
+            role="button" tabindex="0" aria-labelledby="mod-upload-label"
+            aria-describedby="mod-img-err">
+            <input type="file" id="mod-image-file" class="upload-input"
+              accept="image/jpeg,image/png,image/webp" tabindex="-1"
+              aria-label="Choose module image file">
+            <input type="hidden" id="mod-image-url" name="imageUrl">
+            <div class="upload-placeholder" id="mod-upload-ph" aria-hidden="true">
+              <svg class="upload-placeholder__icon" viewBox="0 0 24 24" fill="none">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"
+                  stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="upload-placeholder__label">Click to upload or drag &amp; drop</span>
+              <span class="upload-placeholder__hint">JPEG, PNG or WebP — max 5 MB</span>
+            </div>
+            <div class="upload-preview" id="mod-upload-preview" hidden>
+              <img id="mod-preview-img" src="" alt="Uploaded image preview" class="upload-preview__img">
+              <button type="button" class="upload-preview__remove" id="mod-remove-img"
+                aria-label="Remove image">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <div class="upload-spinner" id="mod-upload-spin" hidden>
+              <span class="upload-spinner__ring"></span>
+              <span>Uploading…</span>
+            </div>
+          </div>
+          <span class="form-error" id="mod-img-err" role="alert"></span>
+        </div>
+
+        <div class="admin-modal-footer">
+          <button type="button" class="btn btn--cancel" id="module-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn--primary" id="module-submit">Add Module</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════
+       MODAL: Add Programme
+       ════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="programme-modal-bd"
+    role="dialog" aria-modal="true" aria-labelledby="programme-modal-title" inert>
+    <div class="modal modal--wide">
+      <button class="modal__close" id="programme-modal-close" aria-label="Close dialog">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="modal__header">
+        <h2 class="modal__title" id="programme-modal-title">Add Programme</h2>
+      </div>
+
+      <p class="form-error--global" id="programme-form-error" role="alert"></p>
+
+      <form id="programme-form" novalidate autocomplete="off">
+        <div class="form-group">
+          <label class="form-label" for="prog-title">
+            Title <span class="form-required" aria-hidden="true">*</span>
+          </label>
+          <input id="prog-title" type="text" class="input" name="title"
+            required maxlength="200" placeholder="BSc Computer Science" autocomplete="off">
+          <span class="form-error" id="prog-title-err" role="alert"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="prog-short-desc">
+            Short Description <span class="form-optional">(optional)</span>
+          </label>
+          <input id="prog-short-desc" type="text" class="input" name="shortDescription"
+            maxlength="500" placeholder="One-line summary visible in listings…" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="prog-desc">
+            Description <span class="form-required" aria-hidden="true">*</span>
+          </label>
+          <textarea id="prog-desc" class="textarea" name="description"
+            required maxlength="5000" rows="4"
+            placeholder="Full programme description, entry requirements, career prospects…"></textarea>
+          <span class="form-error" id="prog-desc-err" role="alert"></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="prog-level">
+              Level <span class="form-required" aria-hidden="true">*</span>
+            </label>
+            <select id="prog-level" class="select" name="level" required>
+              <option value="UNDERGRADUATE">Undergraduate</option>
+              <option value="POSTGRADUATE">Postgraduate</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prog-duration">
+              Duration (years) <span class="form-required" aria-hidden="true">*</span>
+            </label>
+            <input id="prog-duration" type="number" class="input" name="durationYears"
+              required min="1" max="10" value="3">
+            <span class="form-error" id="prog-dur-err" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="prog-leader">
+            Programme Leader <span class="form-optional">(optional)</span>
+          </label>
+          <select id="prog-leader" class="select" name="programmeLeaderId">
+            <option value="">— Select staff member —</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <span class="form-label" id="prog-modules-label">
+            Modules <span class="form-optional">(optional)</span>
+          </span>
+          <div class="modules-picker" id="prog-modules-picker"
+            role="group" aria-labelledby="prog-modules-label">
+            <p class="modules-picker__empty">No modules available yet.</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <span class="form-label" id="prog-upload-label">
+            Image <span class="form-optional">(optional)</span>
+          </span>
+          <div class="upload-area" id="prog-upload-area"
+            role="button" tabindex="0" aria-labelledby="prog-upload-label"
+            aria-describedby="prog-img-err">
+            <input type="file" id="prog-image-file" class="upload-input"
+              accept="image/jpeg,image/png,image/webp" tabindex="-1"
+              aria-label="Choose programme image file">
+            <input type="hidden" id="prog-image-url" name="imageUrl">
+            <div class="upload-placeholder" id="prog-upload-ph" aria-hidden="true">
+              <svg class="upload-placeholder__icon" viewBox="0 0 24 24" fill="none">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"
+                  stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="upload-placeholder__label">Click to upload or drag &amp; drop</span>
+              <span class="upload-placeholder__hint">JPEG, PNG or WebP — max 5 MB</span>
+            </div>
+            <div class="upload-preview" id="prog-upload-preview" hidden>
+              <img id="prog-preview-img" src="" alt="Uploaded image preview" class="upload-preview__img">
+              <button type="button" class="upload-preview__remove" id="prog-remove-img"
+                aria-label="Remove image">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <div class="upload-spinner" id="prog-upload-spin" hidden>
+              <span class="upload-spinner__ring"></span>
+              <span>Uploading…</span>
+            </div>
+          </div>
+          <span class="form-error" id="prog-img-err" role="alert"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="admin-checkbox-label" for="prog-published">
+            <input id="prog-published" type="checkbox" class="admin-checkbox" name="isPublished">
+            <span>Publish immediately</span>
+          </label>
+          <p class="form-notice" style="margin-top:0.3rem">
+            Published programmes appear on the public home page for students to browse.
+          </p>
+        </div>
+
+        <div class="admin-modal-footer">
+          <button type="button" class="btn btn--cancel" id="programme-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn--primary" id="programme-submit">Add Programme</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════
+       MODAL: Confirm Delete
+       ════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="confirm-modal-bd"
+    role="alertdialog" aria-modal="true" aria-labelledby="confirm-modal-title"
+    aria-describedby="confirm-modal-body" inert>
+    <div class="modal" style="max-width:26rem">
+      <button class="modal__close" id="confirm-modal-close" aria-label="Close dialog">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="modal__header">
+        <h2 class="modal__title" id="confirm-modal-title">Confirm Delete</h2>
+      </div>
+      <p id="confirm-modal-body" style="color:var(--text-secondary);font-size:0.9375rem;line-height:1.6;margin-bottom:0.25rem"></p>
+      <div class="admin-modal-footer">
+        <button type="button" class="btn btn--cancel" id="confirm-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn--danger" id="confirm-ok-btn">Delete</button>
+      </div>
+    </div>
+  </div>
 
   <footer class="footer" role="contentinfo">
     <div class="container footer__inner">

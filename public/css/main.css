@@ -811,8 +811,126 @@ ul, ol    { list-style: none; }
 
 .programme-card__actions { display: flex; justify-content: flex-end; }
 
+/* ── Programme leader strip ───────────────────────────────────────── */
+.prog-leader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  margin-bottom: 1.25rem;
+}
+.prog-leader__avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.prog-leader__avatar--initials {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--navy-mid);
+  color: var(--gold-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.prog-leader__label {
+  display: block;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-bottom: 0.1rem;
+}
+.prog-leader__name {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.25;
+}
+.prog-leader__role {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin-top: 0.1rem;
+}
+
+/* ── Module cards grid ────────────────────────────────────────────── */
+.prog-modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.625rem;
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1.5rem;
+}
+.prog-module-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+}
+.prog-module-card--empty {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  background: transparent;
+  border: none;
+  padding-left: 0;
+}
+.prog-module-card__img {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.prog-module-card__icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-sm);
+  background: var(--navy);
+  color: var(--gold-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.prog-module-card__title {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.3;
+}
+.prog-module-card__desc {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-top: 0.2rem;
+}
+@media (max-width: 540px) {
+  .prog-modules-grid { grid-template-columns: 1fr; }
+}
+
 /* ── 11. EMPTY STATE ──────────────────────────────────────────── */
-.programmes-empty {
+.programmes-empty,
+.programmes-loading {
+  list-style: none;
   text-align: center;
   padding: 4rem 2rem;
   color: var(--text-muted);
@@ -1197,4 +1315,385 @@ ul, ol    { list-style: none; }
     transition-duration: 0.01ms !important;
   }
   html { scroll-behavior: auto; }
+}
+
+/* ── 17. ADMIN TABS ───────────────────────────────────────────── */
+.admin-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1.25rem;
+  border-bottom: 2px solid var(--border-light);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.admin-tabs::-webkit-scrollbar { display: none; }
+
+.admin-tab-btn {
+  flex-shrink: 0;
+  padding: 0.75rem 1.25rem;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition:
+    color        var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+  white-space: nowrap;
+}
+.admin-tab-btn:hover { color: var(--navy); }
+.admin-tab-btn.is-active {
+  color: var(--navy);
+  border-bottom-color: var(--gold);
+  font-weight: 600;
+}
+.admin-tab-btn:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── 18. ADMIN MODAL EXTENSIONS ──────────────────────────────── */
+.modal--wide { max-width: 38rem; }
+
+.admin-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.form-error--global {
+  font-size: 0.875rem;
+  color: #C0392B;
+  background: rgba(192,57,43,0.06);
+  border: 1px solid rgba(192,57,43,0.2);
+  border-radius: var(--radius);
+  padding: 0.625rem 0.875rem;
+  margin-bottom: 0.875rem;
+  display: none;
+}
+.form-error--global.is-visible { display: block; }
+
+.admin-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text);
+}
+.admin-checkbox {
+  width: 1.0625rem;
+  height: 1.0625rem;
+  accent-color: var(--gold);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Cancel button in modals */
+.btn--cancel {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border);
+}
+.btn--cancel:hover {
+  background: var(--cream);
+  border-color: var(--border);
+}
+
+/* ── 19. ADMIN TOAST ──────────────────────────────────────────── */
+.admin-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(0.75rem);
+  background: var(--navy);
+  color: var(--white);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(6,15,34,0.35);
+  z-index: 400;
+  opacity: 0;
+  transition:
+    opacity   var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: calc(100vw - 2rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.admin-toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.admin-toast--success { background: #1A5C38; }
+.admin-toast--error   { background: #C0392B; }
+
+/* ── 20. STATUS BADGES (programmes) ──────────────────────────── */
+.badge--published {
+  background: rgba(26,92,56,0.1);
+  color: #1A5C38;
+  border: 1px solid rgba(26,92,56,0.25);
+}
+.badge--draft {
+  background: rgba(11,25,54,0.07);
+  color: var(--text-muted);
+  border: 1px solid rgba(11,25,54,0.12);
+}
+
+/* ── 21. IMAGE UPLOAD AREA ────────────────────────────────────── */
+.upload-area {
+  position: relative;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--cream);
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    border-color var(--dur) var(--ease),
+    background   var(--dur) var(--ease);
+  outline: none;
+}
+.upload-area:hover,
+.upload-area:focus-visible {
+  border-color: var(--gold);
+  background: var(--cream-dark);
+}
+.upload-area:focus-visible {
+  box-shadow: 0 0 0 3px rgba(192,146,40,0.18);
+}
+.upload-area.is-dragover {
+  border-color: var(--gold);
+  background: rgba(192,146,40,0.06);
+}
+.upload-area.is-busy { pointer-events: none; opacity: 0.65; }
+
+/* The file input covers the entire area invisibly */
+.upload-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3125rem;
+  padding: 1.5rem 1rem;
+  min-height: 7rem;
+  text-align: center;
+  pointer-events: none;
+}
+.upload-placeholder__icon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--text-muted);
+  margin-bottom: 0.125rem;
+}
+.upload-placeholder__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.upload-placeholder__hint {
+  font-size: 0.75rem;
+  font-weight: 300;
+  color: var(--text-muted);
+}
+
+.upload-preview {
+  position: relative;
+}
+.upload-preview__img {
+  display: block;
+  width: 100%;
+  max-height: 11rem;
+  object-fit: cover;
+  border-radius: calc(var(--radius) - 2px);
+}
+.upload-preview__remove {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 50%;
+  background: rgba(6,15,34,0.55);
+  backdrop-filter: blur(4px);
+  color: var(--white);
+  border: none;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease-spring);
+}
+.upload-preview__remove svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  pointer-events: none;
+}
+.upload-preview__remove:hover  { background: rgba(6,15,34,0.8); transform: scale(1.1); }
+.upload-preview__remove:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Spinner shown while uploading */
+.upload-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 1.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.upload-spinner__ring {
+  display: block;
+  width: 1.375rem;
+  height: 1.375rem;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: upload-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes upload-spin { to { transform: rotate(360deg); } }
+
+/* ── 21b. MODULES PICKER ──────────────────────────────────────── */
+.modules-picker {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  max-height: 13rem;
+  overflow-y: auto;
+}
+.modules-picker__empty {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+.modules-picker__item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--dur) var(--ease);
+}
+.modules-picker__item:not(:last-child) {
+  border-bottom: 1px solid var(--border-light);
+}
+.modules-picker__item:hover {
+  background: var(--cream);
+}
+.modules-picker__checkbox {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--navy);
+  cursor: pointer;
+}
+.modules-picker__title {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--text);
+  line-height: 1.3;
+}
+.modules-picker__code {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: monospace;
+  flex-shrink: 0;
+}
+
+/* ── 22. ROW ACTION BUTTONS ───────────────────────────────────── */
+.col-actions {
+  width: 1%;
+  white-space: nowrap;
+  padding-right: 1rem !important;
+  text-align: right;
+}
+
+.row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition:
+    background var(--dur) var(--ease),
+    color    var(--dur) var(--ease);
+}
+.btn-action svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+  pointer-events: none;
+}
+.btn-action:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+.btn-action--edit:hover  { background: var(--cream-dark); color: var(--navy); }
+.btn-action--delete:hover { background: rgba(192,57,43,0.08); color: #C0392B; }
+
+/* Danger button for delete confirmation */
+.btn--danger {
+  background: #C0392B;
+  color: var(--white);
+  border-color: #C0392B;
+  font-weight: 600;
+}
+.btn--danger:hover {
+  background: #A93226;
+  border-color: #A93226;
+  box-shadow: 0 4px 14px rgba(192,57,43,0.35);
+  transform: translateY(-1px);
+}
+.btn--danger:focus-visible {
+  outline: 3px solid rgba(192,57,43,0.5);
+  outline-offset: 3px;
+}
+
+/* ── 23. RESPONSIVE OVERRIDES ────────────────────────────────── */
+@media (max-width: 40em) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .col-hide-mobile { display: none; }
+  .admin-modal-footer { flex-direction: column-reverse; }
+  .admin-modal-footer .btn { width: 100%; justify-content: center; }
 }

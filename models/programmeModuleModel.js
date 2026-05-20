@@ -38,4 +38,8 @@ export const programmeModuleModel = {
   remove(id) {
     db.prepare("DELETE FROM programme_modules WHERE id = ?").run(id);
   },
+
+  removeByProgramme(programmeId) {
+    db.prepare("DELETE FROM programme_modules WHERE programme_id = ?").run(programmeId);
+  },
 };

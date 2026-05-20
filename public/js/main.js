@@ -1,76 +1,11 @@
 "use strict";
 
-/* ══════════════════════════════════════════════════════
-   MOCK DATA  (replace with fetch('/api/programmes') later)
-   ══════════════════════════════════════════════════════ */
-const PROGRAMMES = [
-  {
-    id: 1,
-    title: "BSc Computer Science",
-    level: "UNDERGRADUATE",
-    durationYears: 3,
-    shortDescription:
-      "Build the technical foundations of modern software — from algorithms and data structures to operating systems and distributed computing.",
-    description:
-      "Our BSc Computer Science equips you with rigorous theory and practical skills across software development, systems design, databases, and computer networking. You will engage in live industry projects through our partner placement scheme, graduating ready to excel in any technology role.",
-    modules: ["Programming Fundamentals", "Data Structures & Algorithms", "Database Systems", "Computer Networks", "Software Engineering"],
-  },
-  {
-    id: 2,
-    title: "MSc Cyber Security",
-    level: "POSTGRADUATE",
-    durationYears: 1,
-    shortDescription:
-      "Become a specialist in protecting digital infrastructure against evolving global threats — from network intrusion to advanced persistent attacks.",
-    description:
-      "In an increasingly connected world, cyber security professionals are among the most sought-after talent globally. This intensive MSc provides hands-on experience with penetration testing, threat analysis, cryptography, digital forensics, and incident response. You will complete a substantial research dissertation on a live security challenge.",
-    modules: ["Network Security", "Cryptography & PKI", "Ethical Hacking", "Digital Forensics", "Security Risk Management"],
-  },
-  {
-    id: 3,
-    title: "BSc Software Engineering",
-    level: "UNDERGRADUATE",
-    durationYears: 4,
-    shortDescription:
-      "Master the discipline of building reliable, scalable software systems. Includes an optional industry placement year with a leading technology company.",
-    description:
-      "Software Engineering at De Montfort goes far beyond coding — it is about architecting systems that stand the test of time. Over four years, including an optional placement in year three, you will learn design patterns, agile methodologies, quality assurance, DevOps practices, and team-based development that mirrors real-world environments.",
-    modules: ["Software Architecture", "Agile Development", "Software Testing & QA", "DevOps & CI/CD", "Cloud Computing"],
-  },
-  {
-    id: 4,
-    title: "MSc Artificial Intelligence",
-    level: "POSTGRADUATE",
-    durationYears: 1,
-    shortDescription:
-      "Develop cutting-edge AI systems at the intersection of machine learning, data science, and cognitive computing.",
-    description:
-      "This intensive MSc in Artificial Intelligence covers the full spectrum of modern AI — from classical machine learning to deep neural networks, natural language processing, computer vision, and reinforcement learning. You will build production-ready AI systems and conduct original research in your dissertation project.",
-    modules: ["Machine Learning", "Deep Learning", "Natural Language Processing", "Computer Vision", "AI Ethics & Governance"],
-  },
-  {
-    id: 5,
-    title: "BSc Business Management",
-    level: "UNDERGRADUATE",
-    durationYears: 3,
-    shortDescription:
-      "Develop leadership, strategic thinking, and entrepreneurial skills to thrive in dynamic global markets.",
-    description:
-      "Our BSc Business Management blends core business theory with applied practice. You will study finance, marketing, human resources, and operations while developing analytical and leadership skills that employers value. Guest lectures from industry leaders and live project briefs make this a highly practical degree.",
-    modules: ["Business Strategy", "Financial Management", "Marketing Principles", "Organisational Behaviour", "Entrepreneurship"],
-  },
-];
-
-/* ══════════════════════════════════════════════════════
-   STATE
-   ══════════════════════════════════════════════════════ */
-let searchQuery = "";
-let levelFilter = "ALL";
+let programmes     = [];
+let searchQuery    = "";
+let levelFilter    = "ALL";
 let modalTriggerEl = null;
+let _searchTimer   = null;
 
-/* ══════════════════════════════════════════════════════
-   HTML HELPERS
-   ══════════════════════════════════════════════════════ */
 function escHtml(str) {
   return String(str)
     .replace(/&/g, "&amp;")
@@ -87,17 +22,47 @@ function levelBadgeClass(level) {
   return level === "UNDERGRADUATE" ? "badge--ug" : "badge--pg";
 }
 
-/* ══════════════════════════════════════════════════════
-   RENDER
-   ══════════════════════════════════════════════════════ */
 function renderProgrammes() {
   const list = document.getElementById("programme-list");
 
-  list.innerHTML = PROGRAMMES.map((p) => {
+  list.innerHTML = programmes.map((p) => {
     const duration = `${p.durationYears} year${p.durationYears > 1 ? "s" : ""}`;
-    const modules  = p.modules
-      .map((m) => `<li><span class="module-tag">${escHtml(m)}</span></li>`)
-      .join("");
+
+    /* Module cards */
+    const modulesHtml = p.modules.length
+      ? p.modules.map((m) => {
+          const thumb = m.imageUrl
+            ? `<img class="prog-module-card__img" src="${escHtml(m.imageUrl)}" alt="" loading="lazy">`
+            : `<span class="prog-module-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+                  <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+               </span>`;
+          const desc = m.shortDescription
+            ? `<p class="prog-module-card__desc">${escHtml(m.shortDescription)}</p>`
+            : "";
+          return `<li class="prog-module-card">${thumb}<div><span class="prog-module-card__title">${escHtml(m.title)}</span>${desc}</div></li>`;
+        }).join("")
+      : `<li class="prog-module-card prog-module-card--empty">No modules assigned yet.</li>`;
+
+    /* Programme leader */
+    const leaderHtml = p.leader ? (() => {
+      const name    = [p.leader.firstName, p.leader.lastName].filter(Boolean).join(" ");
+      const initStr = ((p.leader.firstName?.[0] ?? "") + (p.leader.lastName?.[0] ?? "")).toUpperCase();
+      const avatar  = p.leader.imageUrl
+        ? `<img class="prog-leader__avatar" src="${escHtml(p.leader.imageUrl)}" alt="">`
+        : `<span class="prog-leader__avatar prog-leader__avatar--initials" aria-hidden="true">${escHtml(initStr)}</span>`;
+      return `
+        <div class="prog-leader">
+          ${avatar}
+          <div>
+            <span class="prog-leader__label">Programme Leader</span>
+            <span class="prog-leader__name">${escHtml(name)}</span>
+            ${p.leader.position ? `<span class="prog-leader__role">${escHtml(p.leader.position)}</span>` : ""}
+          </div>
+        </div>`;
+    })() : "";
 
     return `
       <li class="programme-card" id="card-${p.id}">
@@ -114,28 +79,20 @@ function renderProgrammes() {
               <span class="programme-card__duration">${duration}</span>
             </div>
           </div>
-          <svg
-            class="programme-card__chevron"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            focusable="false"
-          >
+          <svg class="programme-card__chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2"
                   stroke-linecap="round" stroke-linejoin="round" fill="none"/>
           </svg>
         </button>
 
-        <div
-          class="programme-card__body"
-          id="body-${p.id}"
-          aria-hidden="true"
-        >
+        <div class="programme-card__body" id="body-${p.id}" aria-hidden="true">
           <div class="programme-card__content">
-            <p class="programme-card__short-desc">${escHtml(p.shortDescription)}</p>
+            ${p.shortDescription ? `<p class="programme-card__short-desc">${escHtml(p.shortDescription)}</p>` : ""}
             <p class="programme-card__desc">${escHtml(p.description)}</p>
+            ${leaderHtml}
             <p class="programme-card__modules-label">Core Modules</p>
-            <ul class="programme-card__modules" aria-label="Core modules for ${escHtml(p.title)}">
-              ${modules}
+            <ul class="prog-modules-grid" aria-label="Core modules for ${escHtml(p.title)}">
+              ${modulesHtml}
             </ul>
             <div class="programme-card__actions">
               <button
@@ -154,7 +111,7 @@ function renderProgrammes() {
   }).join("");
 
   /* Bind accordion + modal triggers after render */
-  PROGRAMMES.forEach((p) => {
+  programmes.forEach((p) => {
     document.getElementById(`trigger-${p.id}`)
       .addEventListener("click", () => toggleCard(p.id));
 
@@ -166,9 +123,6 @@ function renderProgrammes() {
   });
 }
 
-/* ══════════════════════════════════════════════════════
-   ACCORDION
-   ══════════════════════════════════════════════════════ */
 function toggleCard(id) {
   const card    = document.getElementById(`card-${id}`);
   const trigger = document.getElementById(`trigger-${id}`);
@@ -195,39 +149,33 @@ function toggleCard(id) {
   }
 }
 
-/* ══════════════════════════════════════════════════════
-   FILTER
-   ══════════════════════════════════════════════════════ */
-function applyFilter() {
-  const q     = searchQuery.toLowerCase().trim();
-  const level = levelFilter;
-  let   count = 0;
-
-  PROGRAMMES.forEach((p) => {
-    const card = document.getElementById(`card-${p.id}`);
-    const matchLevel  = level === "ALL" || p.level === level;
-    const matchSearch = !q
-      || p.title.toLowerCase().includes(q)
-      || p.shortDescription.toLowerCase().includes(q)
-      || p.description.toLowerCase().includes(q)
-      || p.modules.some((m) => m.toLowerCase().includes(q));
-
-    if (matchLevel && matchSearch) {
-      card.classList.remove("is-hidden");
-      count++;
-    } else {
-      card.classList.add("is-hidden");
-    }
-  });
-
-  document.getElementById("programmes-count").textContent =
-    `Showing ${count} of ${PROGRAMMES.length} programme${PROGRAMMES.length !== 1 ? "s" : ""}`;
-  document.getElementById("programmes-empty").hidden = count > 0;
+function readUrlParams() {
+  const p = new URLSearchParams(window.location.search);
+  searchQuery = p.get("search") ?? "";
+  levelFilter = p.get("level")  ?? "ALL";
 }
 
-/* ══════════════════════════════════════════════════════
-   MODAL
-   ══════════════════════════════════════════════════════ */
+function syncFormFields() {
+  document.getElementById("search-input").value = searchQuery;
+  document.getElementById("level-select").value = levelFilter;
+}
+
+function navigate() {
+  const p = new URLSearchParams();
+  if (searchQuery)           p.set("search", searchQuery);
+  if (levelFilter !== "ALL") p.set("level",  levelFilter);
+  const qs = p.toString();
+  history.replaceState(null, "", qs ? `?${qs}` : location.pathname);
+  loadProgrammes();
+}
+
+function updateCount() {
+  const n = programmes.length;
+  document.getElementById("programmes-count").textContent =
+    n ? `Showing ${n} programme${n !== 1 ? "s" : ""}` : "";
+  document.getElementById("programmes-empty").hidden = n > 0;
+}
+
 const backdrop = document.getElementById("modal-backdrop");
 const modal    = document.getElementById("contact-modal");
 
@@ -282,9 +230,6 @@ function trapFocus(e, container) {
   }
 }
 
-/* ══════════════════════════════════════════════════════
-   FORM VALIDATION
-   ══════════════════════════════════════════════════════ */
 function validateForm() {
   const form   = document.getElementById("contact-form");
   const fields = {
@@ -324,19 +269,17 @@ function clearFormErrors() {
   });
 }
 
-/* ══════════════════════════════════════════════════════
-   EVENT LISTENERS
-   ══════════════════════════════════════════════════════ */
-/* Search */
+/* Search — debounced so we don't hit the server on every keystroke */
 document.getElementById("search-input").addEventListener("input", (e) => {
   searchQuery = e.target.value;
-  applyFilter();
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(navigate, 350);
 });
 
-/* Level filter */
+/* Level filter — immediate */
 document.getElementById("level-select").addEventListener("change", (e) => {
   levelFilter = e.target.value;
-  applyFilter();
+  navigate();
 });
 
 /* Smooth scroll CTA */
@@ -382,9 +325,6 @@ window.addEventListener("scroll", () => {
     .classList.toggle("is-scrolled", window.scrollY > 8);
 }, { passive: true });
 
-/* ══════════════════════════════════════════════════════
-   AUTH MODAL
-   ══════════════════════════════════════════════════════ */
 const authBackdrop = document.getElementById("auth-backdrop");
 const authModal    = document.getElementById("auth-modal");
 let   authTrigger  = null;
@@ -515,8 +455,33 @@ document.getElementById("register-form").addEventListener("submit", (e) => {
   submitAuthForm("/api/auth/register", data, e.target.querySelector("[type=submit]"));
 });
 
-/* ══════════════════════════════════════════════════════
-   INIT
-   ══════════════════════════════════════════════════════ */
-renderProgrammes();
-applyFilter();
+async function loadProgrammes() {
+  const list  = document.getElementById("programme-list");
+  const count = document.getElementById("programmes-count");
+  const empty = document.getElementById("programmes-empty");
+
+  list.innerHTML = `<li class="programmes-loading" aria-live="polite">Loading…</li>`;
+  count.textContent = "";
+  empty.hidden = true;
+
+  const p = new URLSearchParams();
+  if (searchQuery)           p.set("search", searchQuery);
+  if (levelFilter !== "ALL") p.set("level",  levelFilter);
+  const qs = p.toString();
+
+  try {
+    const res  = await fetch(`/api/programmes${qs ? `?${qs}` : ""}`);
+    const data = await res.json();
+    programmes = data.programmes ?? [];
+  } catch {
+    list.innerHTML = `<li class="programmes-loading">Failed to load programmes. Please refresh the page.</li>`;
+    return;
+  }
+
+  renderProgrammes();
+  updateCount();
+}
+
+readUrlParams();
+syncFormFields();
+loadProgrammes();

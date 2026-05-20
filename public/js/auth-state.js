@@ -1,11 +1,5 @@
 "use strict";
 
-/* ══════════════════════════════════════════════════════
-   AUTH STATE  — shared across all pages
-   User data lives in localStorage; tokens in HTTP-only cookies.
-   Exposed as window.AuthState (plain script, not ES module).
-   ══════════════════════════════════════════════════════ */
-
 (function () {
   const USER_KEY = "dmp_user";
 
@@ -75,7 +69,64 @@
     window.location.href = "/";
   }
 
-  window.AuthState = { getUser, setUser, clearUser, getInitials, applyHeaderAuthState, authFetch, logout };
+  class AuthRedirectError extends Error {
+    constructor() { super("auth-redirect"); this.name = "AuthRedirectError"; }
+  }
+
+  let _refreshing = null;
+
+  async function tryRefresh() {
+    if (_refreshing) return _refreshing;
+    _refreshing = fetch("/api/auth/refresh", { method: "POST", credentials: "include" })
+      .then((r) => {
+        if (!r.ok) { clearUser(); return false; }
+        return true;
+      })
+      .catch(() => { clearUser(); return false; })
+      .finally(() => { _refreshing = null; });
+    return _refreshing;
+  }
+
+  async function apiFetch(input, init = {}) {
+    const opts = { ...init, credentials: "include" };
+    let res = await fetch(input, opts);
+
+    if (res.status === 401) {
+      const refreshed = await tryRefresh();
+      if (!refreshed) {
+        window.location.replace("/");
+        throw new AuthRedirectError();
+      }
+      res = await fetch(input, opts);
+      // Second 401 after a successful refresh means the server rejected the
+      if (res.status === 401) {
+        clearUser();
+        window.location.replace("/");
+        throw new AuthRedirectError();
+      }
+    }
+
+    // 403 = authenticated but not authorised — no point refreshing.
+    if (res.status === 403) {
+      clearUser();
+      window.location.replace("/");
+      throw new AuthRedirectError();
+    }
+
+    return res;
+  }
+
+  window.AuthState = {
+    getUser,
+    setUser,
+    clearUser,
+    getInitials,
+    applyHeaderAuthState,
+    authFetch,
+    apiFetch,
+    logout,
+  };
+  window.AuthRedirectError = AuthRedirectError;
 
   applyHeaderAuthState();
 })();
