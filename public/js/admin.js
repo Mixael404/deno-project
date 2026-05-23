@@ -376,22 +376,43 @@ function populateStaffDropdowns() {
   });
 }
 
-function populateModulesPicker(selectedIds = []) {
+function populateModulesPicker(selectedModules = []) {
   const picker = document.getElementById("prog-modules-picker");
   if (!allModules.length) {
     picker.innerHTML = `<p class="modules-picker__empty">No modules available yet.</p>`;
     return;
   }
+  // selectedModules: [{id, year}] or legacy [id numbers]
+  const selMap = new Map();
+  selectedModules.forEach((m) => {
+    if (typeof m === "object") selMap.set(m.id, m.year ?? 1);
+    else selMap.set(m, 1);
+  });
+
+  const yearOpts = [1, 2, 3, 4, 5].map((y) =>
+    `<option value="${y}">Year ${y}</option>`
+  ).join("");
+
   picker.innerHTML = allModules.map((m) => {
-    const checked = selectedIds.includes(m.id) ? " checked" : "";
-    const code    = m.code ? `<span class="modules-picker__code">${escHtml(m.code)}</span>` : "";
+    const isChecked = selMap.has(m.id);
+    const selYear   = selMap.get(m.id) ?? 1;
+    const checked   = isChecked ? " checked" : "";
+    const code      = m.code ? `<span class="modules-picker__code">${escHtml(m.code)}</span>` : "";
+    const yearSel   = `<select class="modules-picker__year select--inline" data-module-id="${m.id}" aria-label="Year for ${escHtml(m.title)}">${yearOpts}</select>`;
     return `
       <label class="modules-picker__item">
         <input type="checkbox" class="modules-picker__checkbox" name="moduleIds" value="${m.id}"${checked}>
         <span class="modules-picker__title">${escHtml(m.title)}</span>
         ${code}
+        ${yearSel}
       </label>`;
   }).join("");
+
+  // Set the correct year after rendering
+  selMap.forEach((year, id) => {
+    const sel = picker.querySelector(`[data-module-id="${id}"]`);
+    if (sel) sel.value = year;
+  });
 }
 
 async function loadStaff() {
@@ -736,6 +757,17 @@ function renderProgrammes(programmes) {
         <td>${pubBadge}</td>
         <td class="col-actions">
           <div class="row-actions">
+            <button class="btn-action btn-action--subs" data-id="${p.id}"
+              aria-label="View subscribers for ${escHtml(p.title)}">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="9" cy="7" r="4"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
             <button class="btn-action btn-action--edit" data-id="${p.id}"
               aria-label="Edit ${escHtml(p.title)}">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -793,7 +825,7 @@ function onEditProgramme(id) {
   f.programmeLeaderId.value = p.programmeLeaderId ?? "";
   f.isPublished.checked     = Boolean(p.isPublished);
   progUploader.setExisting(p.imageUrl ?? null);
-  populateModulesPicker(p.moduleIds ?? []);
+  populateModulesPicker(p.modules ?? p.moduleIds ?? []);
 
   document.getElementById("programme-modal-title").textContent = "Edit Programme";
   document.getElementById("programme-submit").textContent      = "Save Changes";
@@ -826,8 +858,10 @@ async function onDeleteProgramme(id) {
 }
 
 document.getElementById("programmes-table-body").addEventListener("click", (e) => {
+  const subsBtn   = e.target.closest(".btn-action--subs");
   const editBtn   = e.target.closest(".btn-action--edit");
   const deleteBtn = e.target.closest(".btn-action--delete");
+  if (subsBtn)   onViewSubscribers(+subsBtn.dataset.id);
   if (editBtn)   onEditProgramme(+editBtn.dataset.id);
   if (deleteBtn) onDeleteProgramme(+deleteBtn.dataset.id);
 });
@@ -870,8 +904,11 @@ document.getElementById("programme-form").addEventListener("submit", async (e) =
   }
   if (!ok) return;
 
-  const moduleIds = [...document.querySelectorAll("#prog-modules-picker .modules-picker__checkbox:checked")]
-    .map((cb) => Number(cb.value));
+  const modules = [...document.querySelectorAll("#prog-modules-picker .modules-picker__checkbox:checked")]
+    .map((cb) => {
+      const year = Number(document.querySelector(`#prog-modules-picker [data-module-id="${cb.value}"]`)?.value ?? 1);
+      return { id: Number(cb.value), year };
+    });
 
   const isEdit = programmeEditId !== null;
   const label  = isEdit ? "Save Changes" : "Add Programme";
@@ -889,7 +926,7 @@ document.getElementById("programme-form").addEventListener("submit", async (e) =
       isPublished,
       programmeLeaderId,
       imageUrl: imageUrl || null,
-      moduleIds,
+      modules,
     });
     const data = await res.json();
     if (!res.ok) { globalErr("programme-form-error", data.error ?? "Something went wrong."); return; }
@@ -909,6 +946,255 @@ document.getElementById("programme-form").addEventListener("submit", async (e) =
     }
   } finally {
     setBusy("programme-submit", false, label);
+  }
+});
+
+/* ══════════════════════════════════════════════════════════════════
+   PROGRAMME SUBSCRIBERS
+   ══════════════════════════════════════════════════════════════════ */
+const subsModal        = new Modal("subs-modal-bd");
+let   subsProgrammeId  = null;
+let   subsPage         = 1;
+let   subsActiveTab    = "tracked";
+const SUBS_LIMIT       = 15;
+
+document.getElementById("subs-modal-close").addEventListener("click", () => subsModal.close());
+
+function switchSubsTab(tab) {
+  subsActiveTab = tab;
+  ["tracked", "enquiries"].forEach((t) => {
+    const btn   = document.getElementById(`subs-tab-${t}`);
+    const panel = document.getElementById(`subs-panel-${t}`);
+    const active = t === tab;
+    btn.classList.toggle("is-active", active);
+    btn.setAttribute("aria-selected", String(active));
+    panel.hidden = !active;
+  });
+}
+
+document.getElementById("subs-tab-tracked").addEventListener("click",   () => switchSubsTab("tracked"));
+document.getElementById("subs-tab-enquiries").addEventListener("click", () => { switchSubsTab("enquiries"); loadEnquiries(); });
+
+async function onViewSubscribers(programmeId) {
+  subsProgrammeId = programmeId;
+  subsPage        = 1;
+  switchSubsTab("tracked");
+  document.getElementById("subs-table-body").innerHTML =
+    `<tr class="data-table__loading"><td colspan="4" aria-live="polite">Loading…</td></tr>`;
+  document.getElementById("subs-count-label").textContent = "";
+  document.getElementById("subs-pagination").innerHTML    = "";
+  document.getElementById("enq-table-body").innerHTML =
+    `<tr class="data-table__loading"><td colspan="5" aria-live="polite">Loading…</td></tr>`;
+  document.getElementById("enq-count-label").textContent = "";
+  subsModal.open();
+  await loadSubscribers();
+}
+
+async function loadSubscribers() {
+  const qs = new URLSearchParams({ page: subsPage, limit: SUBS_LIMIT });
+  try {
+    const res  = await AuthState.apiFetch(`/api/admin/programmes/${subsProgrammeId}/subscribers?${qs}`);
+    const data = await res.json();
+    if (!res.ok) { renderSubscribersError(data.error ?? "Failed to load."); return; }
+    renderSubscribers(data);
+  } catch (e) {
+    if (!(e instanceof AuthRedirectError)) renderSubscribersError("Network error — please try again.");
+  }
+}
+
+function renderSubscribers({ programme, subscribers, total, page, pages }) {
+  document.getElementById("subs-modal-title").textContent    = "Subscribers";
+  document.getElementById("subs-programme-name").textContent = programme.title;
+  document.getElementById("subs-count-label").textContent    =
+    total === 0 ? "No tracked students yet."
+    : `${total} tracked student${total !== 1 ? "s" : ""}`;
+
+  const tbody = document.getElementById("subs-table-body");
+  if (!subscribers.length) {
+    tbody.innerHTML = `<tr><td colspan="4" class="data-table__empty-cell">No tracked students yet.</td></tr>`;
+  } else {
+    tbody.innerHTML = subscribers.map((s) => {
+      const name = [s.firstName, s.lastName].filter(Boolean).join(" ") || "—";
+      return `
+        <tr>
+          <td>
+            <div class="user-cell">
+              <span class="avatar avatar--sm" aria-hidden="true">${escHtml(initials(s))}</span>
+              <span class="user-cell__name">${escHtml(name)}</span>
+            </div>
+          </td>
+          <td class="data-table__secondary">${escHtml(s.email)}</td>
+          <td class="data-table__secondary col-hide-mobile">${formatDate(s.subscribedAt)}</td>
+          <td class="col-actions">
+            <button class="btn-action btn-action--delete" data-user-id="${s.userId}"
+              aria-label="Remove ${escHtml(name)}">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </td>
+        </tr>`;
+    }).join("");
+  }
+
+  renderSubsPagination(page, pages, total);
+}
+
+async function loadEnquiries() {
+  try {
+    const res  = await AuthState.apiFetch(`/api/admin/programmes/${subsProgrammeId}/enquiries`);
+    const data = await res.json();
+    if (!res.ok) { renderEnquiriesError(data.error ?? "Failed to load."); return; }
+    renderEnquiries(data);
+  } catch (e) {
+    if (!(e instanceof AuthRedirectError)) renderEnquiriesError("Network error — please try again.");
+  }
+}
+
+function renderEnquiries({ enquiries, total }) {
+  document.getElementById("enq-count-label").textContent =
+    total === 0 ? "No enquiries yet." : `${total} enquir${total !== 1 ? "ies" : "y"}`;
+
+  const tbody = document.getElementById("enq-table-body");
+  if (!enquiries.length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="data-table__empty-cell">No enquiries yet.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = enquiries.map((e) => {
+    const name = [e.firstName, e.lastName].filter(Boolean).join(" ") || "—";
+    const msg  = e.message ? escHtml(e.message).slice(0, 60) + (e.message.length > 60 ? "…" : "") : "—";
+    return `
+      <tr>
+        <td>
+          <div class="user-cell">
+            <span class="avatar avatar--sm" aria-hidden="true">${escHtml((e.firstName?.[0] ?? "") + (e.lastName?.[0] ?? "") || "?")}</span>
+            <span class="user-cell__name">${escHtml(name)}</span>
+          </div>
+        </td>
+        <td class="data-table__secondary">${escHtml(e.email)}</td>
+        <td class="data-table__secondary col-hide-mobile" title="${escHtml(e.message ?? "")}">${msg}</td>
+        <td class="data-table__secondary col-hide-mobile">${formatDate(e.createdAt)}</td>
+        <td class="col-actions">
+          <button class="btn-action btn-action--delete" data-enquiry-id="${e.id}"
+            aria-label="Remove enquiry from ${escHtml(name)}">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </td>
+      </tr>`;
+  }).join("");
+}
+
+function renderEnquiriesError(msg) {
+  document.getElementById("enq-table-body").innerHTML =
+    `<tr><td colspan="5" class="data-table__error">${escHtml(msg)}</td></tr>`;
+}
+
+function renderSubsPagination(page, pages, total) {
+  const container = document.getElementById("subs-pagination");
+  if (pages <= 1) { container.innerHTML = ""; return; }
+
+  container.innerHTML = `
+    <button class="admin-pagination__btn" id="subs-prev-btn" ${page <= 1 ? "disabled" : ""}
+      aria-label="Previous page">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="16" height="16">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span class="admin-pagination__info">Page ${page} of ${pages}</span>
+    <button class="admin-pagination__btn" id="subs-next-btn" ${page >= pages ? "disabled" : ""}
+      aria-label="Next page">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="16" height="16">
+        <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>`;
+
+  document.getElementById("subs-prev-btn").addEventListener("click", async () => {
+    if (subsPage <= 1) return;
+    subsPage--;
+    await loadSubscribers();
+  });
+  document.getElementById("subs-next-btn").addEventListener("click", async () => {
+    if (subsPage >= pages) return;
+    subsPage++;
+    await loadSubscribers();
+  });
+}
+
+function renderSubscribersError(msg) {
+  document.getElementById("subs-table-body").innerHTML =
+    `<tr><td colspan="3" class="data-table__error">${escHtml(msg)}</td></tr>`;
+}
+
+document.getElementById("subs-table-body").addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-user-id]");
+  if (!btn) return;
+  const userId = +btn.dataset.userId;
+  btn.disabled = true;
+  try {
+    const res = await AuthState.apiFetch(`/api/admin/programmes/${subsProgrammeId}/subscribers/${userId}`, { method: "DELETE" });
+    if (res.ok) {
+      await loadSubscribers();
+      showToast("Subscriber removed.");
+    } else {
+      const d = await res.json();
+      showToast(d.error ?? "Failed to remove.", "error");
+      btn.disabled = false;
+    }
+  } catch (e) {
+    if (!(e instanceof AuthRedirectError)) { showToast("Network error.", "error"); btn.disabled = false; }
+  }
+});
+
+document.getElementById("enq-table-body").addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-enquiry-id]");
+  if (!btn) return;
+  const enquiryId = +btn.dataset.enquiryId;
+  btn.disabled = true;
+  try {
+    const res = await AuthState.apiFetch(`/api/admin/enquiries/${enquiryId}`, { method: "DELETE" });
+    if (res.ok) {
+      await loadEnquiries();
+      showToast("Enquiry removed.");
+    } else {
+      const d = await res.json();
+      showToast(d.error ?? "Failed to remove.", "error");
+      btn.disabled = false;
+    }
+  } catch (e) {
+    if (!(e instanceof AuthRedirectError)) { showToast("Network error.", "error"); btn.disabled = false; }
+  }
+});
+
+document.getElementById("subs-export-btn").addEventListener("click", async () => {
+  if (!subsProgrammeId) return;
+  const btn = document.getElementById("subs-export-btn");
+  btn.disabled    = true;
+  btn.textContent = "Exporting…";
+  try {
+    const res = await AuthState.apiFetch(
+      `/api/admin/programmes/${subsProgrammeId}/subscribers/export`
+    );
+    if (!res.ok) { showToast("Export failed.", "error"); return; }
+    const blob     = await res.blob();
+    const url      = URL.createObjectURL(blob);
+    const a        = document.createElement("a");
+    a.href         = url;
+    a.download     = `subscribers-${subsProgrammeId}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    if (!(e instanceof AuthRedirectError)) showToast("Export failed.", "error");
+  } finally {
+    btn.disabled    = false;
+    btn.innerHTML   = `<svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Export Emails`;
   }
 });
 

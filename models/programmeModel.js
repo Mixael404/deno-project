@@ -29,9 +29,13 @@ export const programmeModel = {
     const programmes = db.prepare(sql).all(...params).map(deserialize);
 
     const moduleStmt = db.prepare(`
-      SELECT m.id, m.title, m.image_url, m.short_description
+      SELECT m.id, m.title, m.image_url, m.short_description,
+             pm.year AS module_year,
+             s.first_name AS leader_first_name, s.last_name AS leader_last_name,
+             s.position AS leader_position
       FROM modules m
       JOIN programme_modules pm ON pm.module_id = m.id
+      LEFT JOIN staff_members s ON s.id = m.module_leader_id
       WHERE pm.programme_id = ?
       ORDER BY pm.year, pm.sort_order
     `);
@@ -75,7 +79,7 @@ export const programmeModel = {
         (title, slug, short_description, description, level, image_url, duration_years, is_published, programme_leader_id, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(title, slug, shortDescription, description, level, imageUrl ?? null, durationYears, isPublished ? 1 : 0, programmeLeaderId, ts, ts);
-    return programmeModel.findById(lastInsertRowid);
+    return programmeModel.findById(Number(lastInsertRowid));
   },
 
   update(id, { title, slug, shortDescription, description, level, imageUrl, durationYears, isPublished, programmeLeaderId }) {

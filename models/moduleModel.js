@@ -30,7 +30,7 @@ export const moduleModel = {
         (title, code, slug, short_description, description, image_url, module_leader_id, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(title, code ?? null, slug, shortDescription ?? null, description, imageUrl ?? null, moduleLeaderId, ts, ts);
-    return moduleModel.findById(lastInsertRowid);
+    return moduleModel.findById(Number(lastInsertRowid));
   },
 
   update(id, { title, code, slug, shortDescription, description, imageUrl, moduleLeaderId }) {

@@ -576,6 +576,84 @@
   </div>
 
   <!-- ════════════════════════════════════════════════════════════
+       MODAL: Programme Subscribers
+       ════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="subs-modal-bd"
+    role="dialog" aria-modal="true" aria-labelledby="subs-modal-title" inert>
+    <div class="modal modal--wide">
+      <button class="modal__close" id="subs-modal-close" aria-label="Close dialog">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="modal__header modal__header--flex">
+        <div>
+          <h2 class="modal__title" id="subs-modal-title">Subscribers</h2>
+          <p class="modal__programme" id="subs-programme-name"></p>
+        </div>
+        <button class="btn btn--sm btn--primary" id="subs-export-btn" aria-label="Export subscriber emails as CSV">
+          <svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Export Emails
+        </button>
+      </div>
+
+      <div class="subs-tabs" role="tablist" aria-label="Interest type">
+        <button class="subs-tab is-active" id="subs-tab-tracked"   role="tab" aria-selected="true"  aria-controls="subs-panel-tracked">Tracked</button>
+        <button class="subs-tab"           id="subs-tab-enquiries" role="tab" aria-selected="false" aria-controls="subs-panel-enquiries">Enquiries</button>
+      </div>
+
+      <!-- ── Tracked panel ── -->
+      <div id="subs-panel-tracked" role="tabpanel" aria-labelledby="subs-tab-tracked">
+        <p class="subs-count-label" id="subs-count-label"></p>
+        <div class="data-table-wrap" role="region" aria-label="Tracked students table" tabindex="0">
+          <table class="data-table" id="subs-table">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col" class="col-hide-mobile">Subscribed</th>
+                <th scope="col" class="col-actions"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="subs-table-body">
+              <tr class="data-table__loading">
+                <td colspan="4" aria-live="polite">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-pagination" id="subs-pagination" aria-label="Subscribers pagination"></div>
+      </div>
+
+      <!-- ── Enquiries panel ── -->
+      <div id="subs-panel-enquiries" role="tabpanel" aria-labelledby="subs-tab-enquiries" hidden>
+        <p class="subs-count-label" id="enq-count-label"></p>
+        <div class="data-table-wrap" role="region" aria-label="Contact enquiries table" tabindex="0">
+          <table class="data-table" id="enq-table">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col" class="col-hide-mobile">Message</th>
+                <th scope="col" class="col-hide-mobile">Date</th>
+                <th scope="col" class="col-actions"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="enq-table-body">
+              <tr class="data-table__loading">
+                <td colspan="5" aria-live="polite">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════
        MODAL: Confirm Delete
        ════════════════════════════════════════════════════════════ -->
   <div class="modal-backdrop" id="confirm-modal-bd"

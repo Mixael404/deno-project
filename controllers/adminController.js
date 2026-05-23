@@ -3,6 +3,8 @@ import { staffMemberModel }      from "../models/staffMemberModel.js";
 import { moduleModel }           from "../models/moduleModel.js";
 import { programmeModel }        from "../models/programmeModel.js";
 import { programmeModuleModel }  from "../models/programmeModuleModel.js";
+import { programmeInterestModel }  from "../models/programmeSubscriptionModel.js";
+import { interestRegistrationModel } from "../models/contactRequestModel.js";
 import { verifyAccessToken } from "../utils/jwt.js";
 import { getCookie }         from "../utils/cookies.js";
 import { saveUpload }        from "../utils/upload.js";
@@ -51,6 +53,19 @@ function uniqueSlug(base, existsFn) {
     if (!existsFn(candidate)) return candidate;
   }
   return `${base}-${Date.now()}`;
+}
+
+// Accepts { modules: [{id, year}] } (new format) or legacy { moduleIds: [] } (year=1).
+function parseModules(body) {
+  if (Array.isArray(body.modules)) {
+    return body.modules
+      .map((m) => ({ id: Number(m.id), year: Math.max(1, Math.min(5, Number(m.year) || 1)) }))
+      .filter((m) => m.id > 0);
+  }
+  if (Array.isArray(body.moduleIds)) {
+    return body.moduleIds.map(Number).filter((n) => n > 0).map((id) => ({ id, year: 1 }));
+  }
+  return [];
 }
 
 export const adminController = {
@@ -267,6 +282,7 @@ export const adminController = {
     if (authErr) return json({ error: authErr === 401 ? "Unauthorized" : "Forbidden" }, authErr);
     const programmes = programmeModel.findAll().map((p) => ({
       ...p,
+      modules: programmeModuleModel.findByProgramme(p.id).map((pm) => ({ id: pm.moduleId, year: pm.year })),
       moduleIds: programmeModuleModel.findByProgramme(p.id).map((pm) => pm.moduleId),
     }));
     return json({ programmes });
@@ -295,16 +311,15 @@ export const adminController = {
     const baseSlug  = toSlug(title);
     const slug      = uniqueSlug(baseSlug, (s) => !!programmeModel.findBySlug(s));
 
-    const moduleIds = Array.isArray(body.moduleIds)
-      ? body.moduleIds.map(Number).filter((n) => n > 0)
-      : [];
+    const modulesWithYear = parseModules(body);
 
     const programme = programmeModel.create({
       title, slug, shortDescription, description, level, imageUrl,
       durationYears, isPublished, programmeLeaderId,
     });
-    for (let i = 0; i < moduleIds.length; i++) {
-      programmeModuleModel.create({ programmeId: programme.id, moduleId: moduleIds[i], year: 1, sortOrder: i });
+    for (let i = 0; i < modulesWithYear.length; i++) {
+      const { id: moduleId, year } = modulesWithYear[i];
+      programmeModuleModel.create({ programmeId: programme.id, moduleId, year, sortOrder: i });
     }
     return json({ programme }, 201);
   },
@@ -337,17 +352,16 @@ export const adminController = {
       try { await removeUpload(existing.imageUrl); } catch { /* best-effort */ }
     }
 
-    const moduleIds = Array.isArray(body.moduleIds)
-      ? body.moduleIds.map(Number).filter((n) => n > 0)
-      : [];
+    const modulesWithYear = parseModules(body);
 
     const programme = programmeModel.update(id, {
       title, shortDescription, description, level, imageUrl,
       durationYears, isPublished, programmeLeaderId,
     });
     programmeModuleModel.removeByProgramme(id);
-    for (let i = 0; i < moduleIds.length; i++) {
-      programmeModuleModel.create({ programmeId: id, moduleId: moduleIds[i], year: 1, sortOrder: i });
+    for (let i = 0; i < modulesWithYear.length; i++) {
+      const { id: moduleId, year } = modulesWithYear[i];
+      programmeModuleModel.create({ programmeId: id, moduleId, year, sortOrder: i });
     }
     return json({ programme });
   },
@@ -363,6 +377,75 @@ export const adminController = {
       try { await removeUpload(existing.imageUrl); } catch { /* best-effort */ }
     }
     programmeModel.remove(id);
+    return json({ ok: true });
+  },
+
+  // ── Programme subscribers ──────────────────────────────────────
+  async listProgrammeSubscribers(req, programmeId) {
+    const [, authErr] = await requireAdmin(req);
+    if (authErr) return json({ error: authErr === 401 ? "Unauthorized" : "Forbidden" }, authErr);
+
+    const programme = programmeModel.findById(programmeId);
+    if (!programme) return json({ error: "Programme not found" }, 404);
+
+    const url   = new URL(req.url);
+    const page  = Math.max(1, parseInt(url.searchParams.get("page")  ?? "1",  10));
+    const limit = Math.min(50, Math.max(5, parseInt(url.searchParams.get("limit") ?? "15", 10)));
+
+    const result = programmeInterestModel.findByProgrammeWithUsers(programmeId, { page, limit });
+    return json({ programme: { id: programme.id, title: programme.title }, ...result });
+  },
+
+  async exportProgrammeSubscribers(req, programmeId) {
+    const [, authErr] = await requireAdmin(req);
+    if (authErr) return json({ error: authErr === 401 ? "Unauthorized" : "Forbidden" }, authErr);
+
+    const programme = programmeModel.findById(programmeId);
+    if (!programme) return json({ error: "Programme not found" }, 404);
+
+    const subEmails     = programmeInterestModel.getAllEmailsByProgramme(programmeId);
+    const enquiryEmails = interestRegistrationModel.findByProgramme(programmeId).map((r) => r.email);
+    const allEmails     = [...new Set([...subEmails, ...enquiryEmails])].sort();
+
+    const slug     = programme.slug ?? String(programmeId);
+    const filename = `mailing-list-${slug}.csv`;
+    return new Response(`email\n${allEmails.join("\n")}`, {
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+      },
+    });
+  },
+
+  // ── Contact enquiries (admin) ──────────────────────────────────
+  async listEnquiries(req, programmeId) {
+    const [, authErr] = await requireAdmin(req);
+    if (authErr) return json({ error: authErr === 401 ? "Unauthorized" : "Forbidden" }, authErr);
+
+    const programme = programmeModel.findById(programmeId);
+    if (!programme) return json({ error: "Programme not found" }, 404);
+
+    const enquiries = interestRegistrationModel.findByProgramme(programmeId);
+    return json({ enquiries, total: enquiries.length });
+  },
+
+  async removeEnquiry(req, enquiryId) {
+    const [, authErr] = await requireAdmin(req);
+    if (authErr) return json({ error: authErr === 401 ? "Unauthorized" : "Forbidden" }, authErr);
+
+    interestRegistrationModel.remove(enquiryId);
+    return json({ ok: true });
+  },
+
+  // ── Remove subscriber (admin) ──────────────────────────────────
+  async removeSubscriber(req, programmeId, userId) {
+    const [, authErr] = await requireAdmin(req);
+    if (authErr) return json({ error: authErr === 401 ? "Unauthorized" : "Forbidden" }, authErr);
+
+    const existing = programmeInterestModel.findByUserAndProgramme(userId, programmeId);
+    if (!existing) return json({ error: "Subscription not found" }, 404);
+
+    programmeInterestModel.remove(existing.id);
     return json({ ok: true });
   },
 };

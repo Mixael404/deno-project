@@ -923,6 +923,35 @@ ul, ol    { list-style: none; }
   line-height: 1.4;
   margin-top: 0.2rem;
 }
+.prog-module-card__leader {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+.prog-module-card__leader::before { content: "↳ "; }
+.prog-modules-year-label {
+  grid-column: 1 / -1;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 0.75rem 0 0.25rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--border-light);
+}
+.select--inline {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--white);
+  color: var(--navy);
+  cursor: pointer;
+  margin-left: auto;
+  flex-shrink: 0;
+}
 @media (max-width: 540px) {
   .prog-modules-grid { grid-template-columns: 1fr; }
 }
@@ -1690,7 +1719,194 @@ ul, ol    { list-style: none; }
   outline-offset: 3px;
 }
 
-/* ── 23. RESPONSIVE OVERRIDES ────────────────────────────────── */
+/* ── 23. CONTACT INTEREST TOAST ─────────────────────────────── */
+.contact-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(1rem);
+  background: var(--navy);
+  color: var(--white);
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 9999;
+  pointer-events: none;
+}
+.contact-toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── 24. SUBSCRIBERS MODAL — TABS ────────────────────────────── */
+.subs-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 1rem;
+}
+.subs-tab {
+  padding: 0.5rem 1.125rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  border-radius: 0.25rem 0.25rem 0 0;
+  transition: color 0.15s;
+}
+.subs-tab:hover { color: var(--navy); }
+.subs-tab.is-active {
+  color: var(--navy);
+  border-bottom-color: var(--gold);
+  font-weight: 600;
+}
+
+/* ── 25. SUBSCRIBERS MODAL & PAGINATION ─────────────────────── */
+.modal__header--flex {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-right: 2.25rem;
+  margin-bottom: 0.75rem;
+}
+.modal__header--flex .modal__title { margin-bottom: 0.2rem; }
+
+.subs-count-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem;
+}
+.data-table__empty-cell {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 1.5rem 1rem;
+}
+
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+.admin-pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  color: var(--navy);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.admin-pagination__btn:hover:not(:disabled) {
+  background: var(--bg);
+  border-color: var(--navy);
+}
+.admin-pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.admin-pagination__info {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  min-width: 7rem;
+  text-align: center;
+}
+
+.btn-action--subs {
+  color: #2563EB;
+}
+.btn-action--subs:hover {
+  background: rgba(37,99,235,0.09);
+  color: #1D4ED8;
+}
+
+/* ── 24. TRACK BUTTON (public home page) ────────────────────── */
+.btn--track {
+  margin-left: 8px;
+  background: transparent;
+  color: var(--navy);
+  border-color: var(--navy);
+  padding: 0.5625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  opacity: 0.75;
+}
+.btn--track:hover {
+  background: var(--navy);
+  color: var(--white);
+  opacity: 1;
+}
+
+/* ── 24. SUBSCRIPTIONS (profile page) ──────────────────────── */
+.subscriptions-section {
+  margin-top: 2rem;
+  background: var(--white);
+  border-radius: 1rem;
+  padding: 2rem 2.5rem;
+  box-shadow: 0 2px 24px rgba(0,0,0,0.07);
+}
+.subscriptions-section__title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--navy);
+  margin: 0 0 1.25rem;
+}
+.subscriptions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.subscription-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg);
+  border-radius: 0.625rem;
+  border: 1.5px solid var(--border);
+}
+.subscription-item--empty {
+  justify-content: center;
+  color: var(--text-muted);
+  font-style: italic;
+  border-style: dashed;
+}
+.subscription-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.subscription-item__title {
+  font-weight: 600;
+  color: var(--navy);
+  font-size: 0.9375rem;
+}
+.subscription-item__level {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* ── 25. RESPONSIVE OVERRIDES ────────────────────────────────── */
 @media (max-width: 40em) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .col-hide-mobile { display: none; }

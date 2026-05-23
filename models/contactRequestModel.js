@@ -17,12 +17,11 @@ export const interestRegistrationModel = {
 
   create({ firstName, lastName, email, phone, programmeId, message }) {
     const ts = now();
-    const { lastInsertRowid } = db.prepare(`
+    db.prepare(`
       INSERT INTO contact_requests
         (first_name, last_name, email, phone, programme_id, message, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(firstName, lastName, email, phone ?? null, programmeId, message ?? null, ts, ts);
-    return interestRegistrationModel.findById(lastInsertRowid);
   },
 
   remove(id) {

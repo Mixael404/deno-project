@@ -20,7 +20,7 @@ export const staffMemberModel = {
       INSERT INTO staff_members (first_name, last_name, email, position, bio, image_url, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(firstName, lastName, email, position, bio ?? null, imageUrl ?? null, ts, ts);
-    return staffMemberModel.findById(lastInsertRowid);
+    return staffMemberModel.findById(Number(lastInsertRowid));
   },
 
   update(id, { firstName, lastName, email, position, bio, imageUrl }) {

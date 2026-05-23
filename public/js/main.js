@@ -1,6 +1,7 @@
 "use strict";
 
 let programmes     = [];
+let subscribedIds  = new Set();
 let searchQuery    = "";
 let levelFilter    = "ALL";
 let modalTriggerEl = null;
@@ -22,29 +23,88 @@ function levelBadgeClass(level) {
   return level === "UNDERGRADUATE" ? "badge--ug" : "badge--pg";
 }
 
+function isStudentUser() {
+  const u = AuthState.getUser();
+  return u && u.role !== "ADMIN";
+}
+
+function trackBtnHtml(programmeId) {
+  if (!isStudentUser() || subscribedIds.has(programmeId)) return "";
+  return `<button class="btn btn--track" id="track-btn-${programmeId}" data-programme-id="${programmeId}">Track</button>`;
+}
+
+async function trackProgramme(programmeId) {
+  const btn = document.getElementById(`track-btn-${programmeId}`);
+  if (!btn || btn.disabled) return;
+  btn.disabled = true;
+  btn.textContent = "Tracking…";
+
+  try {
+    const res = await AuthState.apiFetch("/api/subscriptions", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ programmeId }),
+    });
+    if (res.ok || res.status === 409) {
+      subscribedIds.add(programmeId);
+      btn.remove();
+    } else {
+      btn.disabled = false;
+      btn.textContent = "Track";
+    }
+  } catch (e) {
+    if (!(e instanceof AuthRedirectError)) {
+      btn.disabled = false;
+      btn.textContent = "Track";
+    }
+  }
+}
+
 function renderProgrammes() {
   const list = document.getElementById("programme-list");
 
   list.innerHTML = programmes.map((p) => {
     const duration = `${p.durationYears} year${p.durationYears > 1 ? "s" : ""}`;
 
-    /* Module cards */
-    const modulesHtml = p.modules.length
-      ? p.modules.map((m) => {
-          const thumb = m.imageUrl
-            ? `<img class="prog-module-card__img" src="${escHtml(m.imageUrl)}" alt="" loading="lazy">`
-            : `<span class="prog-module-card__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-                  <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-               </span>`;
-          const desc = m.shortDescription
-            ? `<p class="prog-module-card__desc">${escHtml(m.shortDescription)}</p>`
-            : "";
-          return `<li class="prog-module-card">${thumb}<div><span class="prog-module-card__title">${escHtml(m.title)}</span>${desc}</div></li>`;
-        }).join("")
-      : `<li class="prog-module-card prog-module-card--empty">No modules assigned yet.</li>`;
+    /* Module cards — grouped by year */
+    function moduleCardHtml(m) {
+      const thumb = m.imageUrl
+        ? `<img class="prog-module-card__img" src="${escHtml(m.imageUrl)}" alt="" loading="lazy">`
+        : `<span class="prog-module-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+              <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+           </span>`;
+      const desc = m.shortDescription
+        ? `<p class="prog-module-card__desc">${escHtml(m.shortDescription)}</p>`
+        : "";
+      const leaderName = m.leaderFirstName
+        ? `<span class="prog-module-card__leader">${escHtml([m.leaderFirstName, m.leaderLastName].filter(Boolean).join(" "))}</span>`
+        : "";
+      return `<li class="prog-module-card">${thumb}<div><span class="prog-module-card__title">${escHtml(m.title)}</span>${desc}${leaderName}</div></li>`;
+    }
+
+    let modulesHtml;
+    if (!p.modules.length) {
+      modulesHtml = `<li class="prog-module-card prog-module-card--empty">No modules assigned yet.</li>`;
+    } else {
+      const byYear = new Map();
+      p.modules.forEach((m) => {
+        const y = m.moduleYear ?? 1;
+        if (!byYear.has(y)) byYear.set(y, []);
+        byYear.get(y).push(m);
+      });
+      const years = [...byYear.keys()].sort((a, b) => a - b);
+      const multiYear = years.length > 1;
+      modulesHtml = years.map((y) => {
+        const header = multiYear
+          ? `</ul><p class="prog-modules-year-label">Year ${y}</p><ul class="prog-modules-grid" aria-label="Year ${y} modules">`
+          : "";
+        return header + byYear.get(y).map(moduleCardHtml).join("");
+      }).join("");
+      if (multiYear) modulesHtml = modulesHtml.replace(/^<\/ul>/, "");
+    }
 
     /* Programme leader */
     const leaderHtml = p.leader ? (() => {
@@ -91,9 +151,7 @@ function renderProgrammes() {
             <p class="programme-card__desc">${escHtml(p.description)}</p>
             ${leaderHtml}
             <p class="programme-card__modules-label">Core Modules</p>
-            <ul class="prog-modules-grid" aria-label="Core modules for ${escHtml(p.title)}">
-              ${modulesHtml}
-            </ul>
+            <ul class="prog-modules-grid" aria-label="Core modules for ${escHtml(p.title)}">${modulesHtml}</ul>
             <div class="programme-card__actions">
               <button
                 class="btn btn--interest"
@@ -103,6 +161,7 @@ function renderProgrammes() {
               >
                 Contact Us
               </button>
+              ${trackBtnHtml(p.id)}
             </div>
           </div>
         </div>
@@ -110,7 +169,7 @@ function renderProgrammes() {
     `;
   }).join("");
 
-  /* Bind accordion + modal triggers after render */
+  /* Bind accordion, modal, and track triggers after render */
   programmes.forEach((p) => {
     document.getElementById(`trigger-${p.id}`)
       .addEventListener("click", () => toggleCard(p.id));
@@ -120,6 +179,9 @@ function renderProgrammes() {
         const btn = e.currentTarget;
         openModal(btn.dataset.programmeId, btn.dataset.programmeTitle, btn);
       });
+
+    const trackBtn = document.getElementById(`track-btn-${p.id}`);
+    if (trackBtn) trackBtn.addEventListener("click", () => trackProgramme(p.id));
   });
 }
 
@@ -182,6 +244,7 @@ const modal    = document.getElementById("contact-modal");
 function openModal(programmeId, programmeTitle, triggerEl) {
   modalTriggerEl = triggerEl;
   document.getElementById("modal-programme").textContent = programmeTitle;
+  document.getElementById("contact-form").dataset.programmeId = programmeId;
 
   backdrop.classList.add("is-open");
   backdrop.removeAttribute("aria-hidden");
@@ -204,7 +267,9 @@ function closeModal() {
   url.searchParams.delete("programme");
   history.replaceState(null, "", url);
 
-  document.getElementById("contact-form").reset();
+  const form = document.getElementById("contact-form");
+  form.reset();
+  form.querySelector(".contact-server-error")?.remove();
   clearFormErrors();
 
   modalTriggerEl?.focus();
@@ -309,14 +374,53 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* Form submit */
-document.getElementById("contact-form").addEventListener("submit", (e) => {
+document.getElementById("contact-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!validateForm()) return;
 
-  const data = Object.fromEntries(new FormData(e.target));
-  /* TODO: POST to /api/contact-requests */
-  console.log("Interest registered:", data);
-  closeModal();
+  const submitBtn = e.target.querySelector("[type=submit]");
+  const origText  = submitBtn.textContent;
+  submitBtn.disabled    = true;
+  submitBtn.textContent = "Submitting…";
+
+  const data        = Object.fromEntries(new FormData(e.target));
+  const programmeId = Number(e.target.dataset.programmeId);
+
+  try {
+    const res  = await fetch("/api/contact", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ ...data, programmeId }),
+    });
+    const json = await res.json();
+
+    if (!res.ok) {
+      const banner = e.target.querySelector(".contact-server-error") ?? (() => {
+        const el = document.createElement("p");
+        el.className = "contact-server-error form-error";
+        el.style.textAlign    = "center";
+        el.style.marginBottom = "0.5rem";
+        e.target.prepend(el);
+        return el;
+      })();
+      banner.textContent = json.error ?? "Something went wrong. Please try again.";
+      return;
+    }
+
+    closeModal();
+    /* Brief success confirmation */
+    const toast = document.createElement("div");
+    toast.className = "contact-toast";
+    toast.textContent = "Thank you! We'll be in touch soon.";
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add("is-visible")));
+    setTimeout(() => { toast.classList.remove("is-visible"); setTimeout(() => toast.remove(), 400); }, 4000);
+  } catch {
+    alert("Network error. Please try again.");
+  } finally {
+    submitBtn.disabled    = false;
+    submitBtn.textContent = origText;
+  }
 });
 
 /* Header scroll state */
@@ -455,6 +559,16 @@ document.getElementById("register-form").addEventListener("submit", (e) => {
   submitAuthForm("/api/auth/register", data, e.target.querySelector("[type=submit]"));
 });
 
+async function loadSubscriptions() {
+  if (!isStudentUser()) return;
+  try {
+    const res = await fetch("/api/subscriptions", { credentials: "include" });
+    if (!res.ok) return;
+    const data = await res.json();
+    subscribedIds = new Set((data.subscriptions ?? []).map((s) => s.programmeId));
+  } catch { /* silent — no subscriptions loaded */ }
+}
+
 async function loadProgrammes() {
   const list  = document.getElementById("programme-list");
   const count = document.getElementById("programmes-count");
@@ -470,8 +584,11 @@ async function loadProgrammes() {
   const qs = p.toString();
 
   try {
-    const res  = await fetch(`/api/programmes${qs ? `?${qs}` : ""}`);
-    const data = await res.json();
+    const [progsRes] = await Promise.all([
+      fetch(`/api/programmes${qs ? `?${qs}` : ""}`),
+      loadSubscriptions(),
+    ]);
+    const data = await progsRes.json();
     programmes = data.programmes ?? [];
   } catch {
     list.innerHTML = `<li class="programmes-loading">Failed to load programmes. Please refresh the page.</li>`;

@@ -22,7 +22,7 @@ export const programmeModuleModel = {
       INSERT INTO programme_modules (programme_id, module_id, year, semester, is_core, sort_order, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(programmeId, moduleId, year, semester ?? null, isCore ? 1 : 0, sortOrder, ts, ts);
-    return programmeModuleModel.findById(lastInsertRowid);
+    return programmeModuleModel.findById(Number(lastInsertRowid));
   },
 
   update(id, { year, semester, isCore, sortOrder }) {
