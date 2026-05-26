@@ -20,7 +20,7 @@ function formatDate(iso) {
 
 function initials(u) {
   const f = u.firstName?.[0] ?? "";
-  const l = u.lastName?.[0]  ?? "";
+  const l = u.lastName?.[0] ?? "";
   return (f + l).toUpperCase() || (u.email?.[0] ?? "?").toUpperCase();
 }
 
@@ -44,10 +44,10 @@ function showToast(message, type = "success") {
 
 class Modal {
   constructor(backdropId) {
-    this.bd    = document.getElementById(backdropId);
+    this.bd = document.getElementById(backdropId);
     this._prev = null;
     this._onKey = this._handleKey.bind(this);
-    this._onBd  = (e) => { if (e.target === this.bd) this.close(); };
+    this._onBd = (e) => { if (e.target === this.bd) this.close(); };
   }
 
   open() {
@@ -96,7 +96,7 @@ const TABS = ["users", "staff", "modules", "programmes"];
 
 function switchTab(name) {
   TABS.forEach((t) => {
-    const btn   = document.getElementById(`tab-btn-${t}`);
+    const btn = document.getElementById(`tab-btn-${t}`);
     const panel = document.getElementById(`tab-${t}`);
     const active = t === name;
     btn.classList.toggle("is-active", active);
@@ -125,23 +125,23 @@ document.querySelectorAll(".admin-tab-btn").forEach((btn) => {
   });
 });
 
-let allUsers      = [];
-let allStaff      = [];
-let allModules    = [];
+let allUsers = [];
+let allStaff = [];
+let allModules = [];
 let allProgrammes = [];
 
-let staffEditId      = null;
-let moduleEditId     = null;
-let programmeEditId  = null;
+let staffEditId = null;
+let moduleEditId = null;
+let programmeEditId = null;
 
 function updateStats() {
   const students = allUsers.filter((u) => u.role === "STUDENT").length;
-  const admins   = allUsers.filter((u) => u.role === "ADMIN").length;
-  document.getElementById("stat-total").textContent      = allUsers.length;
-  document.getElementById("stat-students").textContent   = students;
-  document.getElementById("stat-admins").textContent     = admins;
-  document.getElementById("stat-staff").textContent      = allStaff.length;
-  document.getElementById("stat-modules").textContent    = allModules.length;
+  const admins = allUsers.filter((u) => u.role === "ADMIN").length;
+  document.getElementById("stat-total").textContent = allUsers.length;
+  document.getElementById("stat-students").textContent = students;
+  document.getElementById("stat-admins").textContent = admins;
+  document.getElementById("stat-staff").textContent = allStaff.length;
+  document.getElementById("stat-modules").textContent = allModules.length;
   document.getElementById("stat-programmes").textContent = allProgrammes.length;
 }
 
@@ -196,18 +196,18 @@ async function loadUsers() {
 document.getElementById("user-search").addEventListener("input", (e) => applyUserSearch(e.target.value));
 
 function createImageUploader(prefix) {
-  const area       = document.getElementById(`${prefix}-upload-area`);
-  const fileInput  = document.getElementById(`${prefix}-image-file`);
-  const urlField   = document.getElementById(`${prefix}-image-url`);
-  const ph         = document.getElementById(`${prefix}-upload-ph`);
-  const preview    = document.getElementById(`${prefix}-upload-preview`);
+  const area = document.getElementById(`${prefix}-upload-area`);
+  const fileInput = document.getElementById(`${prefix}-image-file`);
+  const urlField = document.getElementById(`${prefix}-image-url`);
+  const ph = document.getElementById(`${prefix}-upload-ph`);
+  const preview = document.getElementById(`${prefix}-upload-preview`);
   const previewImg = document.getElementById(`${prefix}-preview-img`);
-  const removeBtn  = document.getElementById(`${prefix}-remove-img`);
-  const spinner    = document.getElementById(`${prefix}-upload-spin`);
-  const errEl      = document.getElementById(`${prefix}-img-err`);
+  const removeBtn = document.getElementById(`${prefix}-remove-img`);
+  const spinner = document.getElementById(`${prefix}-upload-spin`);
+  const errEl = document.getElementById(`${prefix}-img-err`);
 
   function showState(state) {
-    ph.hidden      = state !== "idle";
+    ph.hidden = state !== "idle";
     preview.hidden = state !== "preview";
     spinner.hidden = state !== "busy";
     area.classList.toggle("is-busy", state === "busy");
@@ -221,15 +221,15 @@ function createImageUploader(prefix) {
     const fd = new FormData();
     fd.append("file", file);
     try {
-      const res  = await AuthState.apiFetch("/api/admin/upload", { method: "POST", body: fd });
+      const res = await AuthState.apiFetch("/api/admin/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) {
         errEl.textContent = data.error ?? "Upload failed.";
         showState("idle");
         return;
       }
-      urlField.value   = data.url;
-      previewImg.src   = data.url;
+      urlField.value = data.url;
+      previewImg.src = data.url;
       showState("preview");
     } catch (e) {
       if (!(e instanceof AuthRedirectError)) {
@@ -242,17 +242,17 @@ function createImageUploader(prefix) {
   }
 
   function reset() {
-    urlField.value    = "";
-    previewImg.src    = "";
-    fileInput.value   = "";
+    urlField.value = "";
+    previewImg.src = "";
+    fileInput.value = "";
     errEl.textContent = "";
     showState("idle");
   }
 
   function setExisting(url) {
     if (!url) { reset(); return; }
-    urlField.value    = url;
-    previewImg.src    = url;
+    urlField.value = url;
+    previewImg.src = url;
     errEl.textContent = "";
     showState("preview");
   }
@@ -291,9 +291,9 @@ function createImageUploader(prefix) {
   return { reset, setExisting };
 }
 
-const staffUploader  = createImageUploader("staff");
+const staffUploader = createImageUploader("staff");
 const moduleUploader = createImageUploader("mod");
-const progUploader   = createImageUploader("prog");
+const progUploader = createImageUploader("prog");
 
 const confirmModal = new Modal("confirm-modal-bd");
 let _confirmCallback = null;
@@ -307,7 +307,7 @@ document.getElementById("confirm-ok-btn").addEventListener("click", () => {
 
 function showConfirm({ title, body, onConfirm }) {
   document.getElementById("confirm-modal-title").textContent = title;
-  document.getElementById("confirm-modal-body").textContent  = body;
+  document.getElementById("confirm-modal-body").textContent = body;
   _confirmCallback = onConfirm;
   confirmModal.open();
 }
@@ -395,10 +395,10 @@ function populateModulesPicker(selectedModules = []) {
 
   picker.innerHTML = allModules.map((m) => {
     const isChecked = selMap.has(m.id);
-    const selYear   = selMap.get(m.id) ?? 1;
-    const checked   = isChecked ? " checked" : "";
-    const code      = m.code ? `<span class="modules-picker__code">${escHtml(m.code)}</span>` : "";
-    const yearSel   = `<select class="modules-picker__year select--inline" data-module-id="${m.id}" aria-label="Year for ${escHtml(m.title)}">${yearOpts}</select>`;
+    const selYear = selMap.get(m.id) ?? 1;
+    const checked = isChecked ? " checked" : "";
+    const code = m.code ? `<span class="modules-picker__code">${escHtml(m.code)}</span>` : "";
+    const yearSel = `<select class="modules-picker__year select--inline" data-module-id="${m.id}" aria-label="Year for ${escHtml(m.title)}">${yearOpts}</select>`;
     return `
       <label class="modules-picker__item">
         <input type="checkbox" class="modules-picker__checkbox" name="moduleIds" value="${m.id}"${checked}>
@@ -437,14 +437,14 @@ function onEditStaff(id) {
   const f = document.getElementById("staff-form");
   f.reset();
   f.firstName.value = s.firstName ?? "";
-  f.lastName.value  = s.lastName  ?? "";
-  f.email.value     = s.email     ?? "";
-  f.position.value  = s.position  ?? "";
-  f.bio.value       = s.bio       ?? "";
+  f.lastName.value = s.lastName ?? "";
+  f.email.value = s.email ?? "";
+  f.position.value = s.position ?? "";
+  f.bio.value = s.bio ?? "";
   staffUploader.setExisting(s.imageUrl ?? null);
 
   document.getElementById("staff-modal-title").textContent = "Edit Staff Member";
-  document.getElementById("staff-submit").textContent      = "Save Changes";
+  document.getElementById("staff-submit").textContent = "Save Changes";
   clearGlobalErr("staff-form-error");
   clearFieldErrs("staff-fn-err", "staff-ln-err", "staff-email-err", "staff-pos-err", "staff-img-err");
   staffModal.open();
@@ -455,7 +455,7 @@ async function onDeleteStaff(id) {
   if (!s) return;
   showConfirm({
     title: "Delete Staff Member",
-    body:  `Are you sure you want to delete "${fullName(s)}"? This action cannot be undone.`,
+    body: `Are you sure you want to delete "${fullName(s)}"? This action cannot be undone.`,
     onConfirm: async () => {
       try {
         const res = await AuthState.apiFetch(`/api/admin/staff/${id}`, { method: "DELETE" });
@@ -474,9 +474,9 @@ async function onDeleteStaff(id) {
 }
 
 document.getElementById("staff-table-body").addEventListener("click", (e) => {
-  const editBtn   = e.target.closest(".btn-action--edit");
+  const editBtn = e.target.closest(".btn-action--edit");
   const deleteBtn = e.target.closest(".btn-action--delete");
-  if (editBtn)   onEditStaff(+editBtn.dataset.id);
+  if (editBtn) onEditStaff(+editBtn.dataset.id);
   if (deleteBtn) onDeleteStaff(+deleteBtn.dataset.id);
 });
 
@@ -485,13 +485,13 @@ document.getElementById("add-staff-btn").addEventListener("click", () => {
   document.getElementById("staff-form").reset();
   staffUploader.reset();
   document.getElementById("staff-modal-title").textContent = "Add Staff Member";
-  document.getElementById("staff-submit").textContent      = "Add Staff Member";
+  document.getElementById("staff-submit").textContent = "Add Staff Member";
   clearGlobalErr("staff-form-error");
   clearFieldErrs("staff-fn-err", "staff-ln-err", "staff-email-err", "staff-pos-err", "staff-img-err");
   staffModal.open();
 });
 document.getElementById("staff-modal-close").addEventListener("click", () => staffModal.close());
-document.getElementById("staff-cancel-btn").addEventListener("click",  () => staffModal.close());
+document.getElementById("staff-cancel-btn").addEventListener("click", () => staffModal.close());
 
 document.getElementById("staff-form").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -499,18 +499,18 @@ document.getElementById("staff-form").addEventListener("submit", async (e) => {
   clearFieldErrs("staff-fn-err", "staff-ln-err", "staff-email-err", "staff-pos-err", "staff-img-err");
 
   const f = e.target;
-  let ok  = true;
+  let ok = true;
 
   const firstName = f.firstName.value.trim();
-  const lastName  = f.lastName.value.trim();
-  const email     = f.email.value.trim();
-  const position  = f.position.value.trim();
-  const bio       = f.bio.value.trim();
-  const imageUrl  = f.imageUrl.value.trim();
+  const lastName = f.lastName.value.trim();
+  const email = f.email.value.trim();
+  const position = f.position.value.trim();
+  const bio = f.bio.value.trim();
+  const imageUrl = f.imageUrl.value.trim();
 
-  if (!firstName) { fieldErr("staff-fn-err",    "First name is required"); ok = false; }
-  if (!lastName)  { fieldErr("staff-ln-err",    "Last name is required");  ok = false; }
-  if (!email)            { fieldErr("staff-email-err", "Email is required"); ok = false; }
+  if (!firstName) { fieldErr("staff-fn-err", "First name is required"); ok = false; }
+  if (!lastName) { fieldErr("staff-ln-err", "Last name is required"); ok = false; }
+  if (!email) { fieldErr("staff-email-err", "Email is required"); ok = false; }
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     fieldErr("staff-email-err", "Enter a valid email address"); ok = false;
   }
@@ -518,15 +518,15 @@ document.getElementById("staff-form").addEventListener("submit", async (e) => {
   if (!ok) return;
 
   const isEdit = staffEditId !== null;
-  const label  = isEdit ? "Save Changes" : "Add Staff Member";
+  const label = isEdit ? "Save Changes" : "Add Staff Member";
   const method = isEdit ? "PUT" : "POST";
-  const path   = isEdit ? `/api/admin/staff/${staffEditId}` : "/api/admin/staff";
+  const path = isEdit ? `/api/admin/staff/${staffEditId}` : "/api/admin/staff";
 
   setBusy("staff-submit", true, label);
   try {
     const res = await apiFetch(method, path, {
       firstName, lastName, email, position,
-      bio:      bio      || null,
+      bio: bio || null,
       imageUrl: imageUrl || null,
     });
     const data = await res.json();
@@ -622,15 +622,15 @@ function onEditModule(id) {
 
   const f = document.getElementById("module-form");
   f.reset();
-  f.title.value            = m.title            ?? "";
-  f.code.value             = m.code             ?? "";
+  f.title.value = m.title ?? "";
+  f.code.value = m.code ?? "";
   f.shortDescription.value = m.shortDescription ?? "";
-  f.description.value      = m.description      ?? "";
-  f.moduleLeaderId.value   = m.moduleLeaderId   ?? "";
+  f.description.value = m.description ?? "";
+  f.moduleLeaderId.value = m.moduleLeaderId ?? "";
   moduleUploader.setExisting(m.imageUrl ?? null);
 
   document.getElementById("module-modal-title").textContent = "Edit Module";
-  document.getElementById("module-submit").textContent      = "Save Changes";
+  document.getElementById("module-submit").textContent = "Save Changes";
   clearGlobalErr("module-form-error");
   clearFieldErrs("mod-title-err", "mod-code-err", "mod-desc-err", "mod-img-err");
   moduleModal.open();
@@ -641,7 +641,7 @@ async function onDeleteModule(id) {
   if (!m) return;
   showConfirm({
     title: "Delete Module",
-    body:  `Are you sure you want to delete "${m.title}"? This action cannot be undone.`,
+    body: `Are you sure you want to delete "${m.title}"? This action cannot be undone.`,
     onConfirm: async () => {
       try {
         const res = await AuthState.apiFetch(`/api/admin/modules/${id}`, { method: "DELETE" });
@@ -660,9 +660,9 @@ async function onDeleteModule(id) {
 }
 
 document.getElementById("modules-table-body").addEventListener("click", (e) => {
-  const editBtn   = e.target.closest(".btn-action--edit");
+  const editBtn = e.target.closest(".btn-action--edit");
   const deleteBtn = e.target.closest(".btn-action--delete");
-  if (editBtn)   onEditModule(+editBtn.dataset.id);
+  if (editBtn) onEditModule(+editBtn.dataset.id);
   if (deleteBtn) onDeleteModule(+deleteBtn.dataset.id);
 });
 
@@ -671,13 +671,13 @@ document.getElementById("add-module-btn").addEventListener("click", () => {
   document.getElementById("module-form").reset();
   moduleUploader.reset();
   document.getElementById("module-modal-title").textContent = "Add Module";
-  document.getElementById("module-submit").textContent      = "Add Module";
+  document.getElementById("module-submit").textContent = "Add Module";
   clearGlobalErr("module-form-error");
   clearFieldErrs("mod-title-err", "mod-code-err", "mod-desc-err", "mod-img-err");
   moduleModal.open();
 });
 document.getElementById("module-modal-close").addEventListener("click", () => moduleModal.close());
-document.getElementById("module-cancel-btn").addEventListener("click",  () => moduleModal.close());
+document.getElementById("module-cancel-btn").addEventListener("click", () => moduleModal.close());
 
 document.getElementById("module-form").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -685,32 +685,32 @@ document.getElementById("module-form").addEventListener("submit", async (e) => {
   clearFieldErrs("mod-title-err", "mod-code-err", "mod-desc-err", "mod-img-err");
 
   const f = e.target;
-  let ok  = true;
+  let ok = true;
 
-  const title            = f.title.value.trim();
-  const code             = f.code.value.trim();
+  const title = f.title.value.trim();
+  const code = f.code.value.trim();
   const shortDescription = f.shortDescription.value.trim();
-  const description      = f.description.value.trim();
-  const imageUrl         = f.imageUrl.value.trim();
-  const moduleLeaderId   = f.moduleLeaderId.value || null;
+  const description = f.description.value.trim();
+  const imageUrl = f.imageUrl.value.trim();
+  const moduleLeaderId = f.moduleLeaderId.value || null;
 
-  if (!title)       { fieldErr("mod-title-err", "Title is required");       ok = false; }
-  if (!description) { fieldErr("mod-desc-err",  "Description is required"); ok = false; }
+  if (!title) { fieldErr("mod-title-err", "Title is required"); ok = false; }
+  if (!description) { fieldErr("mod-desc-err", "Description is required"); ok = false; }
   if (!ok) return;
 
   const isEdit = moduleEditId !== null;
-  const label  = isEdit ? "Save Changes" : "Add Module";
+  const label = isEdit ? "Save Changes" : "Add Module";
   const method = isEdit ? "PUT" : "POST";
-  const path   = isEdit ? `/api/admin/modules/${moduleEditId}` : "/api/admin/modules";
+  const path = isEdit ? `/api/admin/modules/${moduleEditId}` : "/api/admin/modules";
 
   setBusy("module-submit", true, label);
   try {
     const res = await apiFetch(method, path, {
       title,
-      code:             code             || null,
+      code: code || null,
       shortDescription: shortDescription || null,
       description,
-      imageUrl:         imageUrl         || null,
+      imageUrl: imageUrl || null,
       moduleLeaderId,
     });
     const data = await res.json();
@@ -744,7 +744,7 @@ function renderProgrammes(programmes) {
   }
   empty.hidden = true;
   tbody.innerHTML = programmes.map((p) => {
-    const lvlCls  = p.level === "POSTGRADUATE" ? "badge--pg" : "badge--ug";
+    const lvlCls = p.level === "POSTGRADUATE" ? "badge--pg" : "badge--ug";
     const lvlText = p.level === "POSTGRADUATE" ? "Postgraduate" : "Undergraduate";
     const pubBadge = p.isPublished
       ? `<span class="badge badge--published">Published</span>`
@@ -817,18 +817,18 @@ function onEditProgramme(id) {
 
   const f = document.getElementById("programme-form");
   f.reset();
-  f.title.value             = p.title            ?? "";
-  f.shortDescription.value  = p.shortDescription ?? "";
-  f.description.value       = p.description      ?? "";
-  f.level.value             = p.level            ?? "UNDERGRADUATE";
-  f.durationYears.value     = p.durationYears    ?? 3;
+  f.title.value = p.title ?? "";
+  f.shortDescription.value = p.shortDescription ?? "";
+  f.description.value = p.description ?? "";
+  f.level.value = p.level ?? "UNDERGRADUATE";
+  f.durationYears.value = p.durationYears ?? 3;
   f.programmeLeaderId.value = p.programmeLeaderId ?? "";
-  f.isPublished.checked     = Boolean(p.isPublished);
+  f.isPublished.checked = Boolean(p.isPublished);
   progUploader.setExisting(p.imageUrl ?? null);
   populateModulesPicker(p.modules ?? p.moduleIds ?? []);
 
   document.getElementById("programme-modal-title").textContent = "Edit Programme";
-  document.getElementById("programme-submit").textContent      = "Save Changes";
+  document.getElementById("programme-submit").textContent = "Save Changes";
   clearGlobalErr("programme-form-error");
   clearFieldErrs("prog-title-err", "prog-desc-err", "prog-dur-err", "prog-img-err");
   programmeModal.open();
@@ -839,7 +839,7 @@ async function onDeleteProgramme(id) {
   if (!p) return;
   showConfirm({
     title: "Delete Programme",
-    body:  `Are you sure you want to delete "${p.title}"? This action cannot be undone.`,
+    body: `Are you sure you want to delete "${p.title}"? This action cannot be undone.`,
     onConfirm: async () => {
       try {
         const res = await AuthState.apiFetch(`/api/admin/programmes/${id}`, { method: "DELETE" });
@@ -858,11 +858,11 @@ async function onDeleteProgramme(id) {
 }
 
 document.getElementById("programmes-table-body").addEventListener("click", (e) => {
-  const subsBtn   = e.target.closest(".btn-action--subs");
-  const editBtn   = e.target.closest(".btn-action--edit");
+  const subsBtn = e.target.closest(".btn-action--subs");
+  const editBtn = e.target.closest(".btn-action--edit");
   const deleteBtn = e.target.closest(".btn-action--delete");
-  if (subsBtn)   onViewSubscribers(+subsBtn.dataset.id);
-  if (editBtn)   onEditProgramme(+editBtn.dataset.id);
+  if (subsBtn) onViewSubscribers(+subsBtn.dataset.id);
+  if (editBtn) onEditProgramme(+editBtn.dataset.id);
   if (deleteBtn) onDeleteProgramme(+deleteBtn.dataset.id);
 });
 
@@ -872,13 +872,13 @@ document.getElementById("add-programme-btn").addEventListener("click", () => {
   progUploader.reset();
   populateModulesPicker();
   document.getElementById("programme-modal-title").textContent = "Add Programme";
-  document.getElementById("programme-submit").textContent      = "Add Programme";
+  document.getElementById("programme-submit").textContent = "Add Programme";
   clearGlobalErr("programme-form-error");
   clearFieldErrs("prog-title-err", "prog-desc-err", "prog-dur-err", "prog-img-err");
   programmeModal.open();
 });
 document.getElementById("programme-modal-close").addEventListener("click", () => programmeModal.close());
-document.getElementById("programme-cancel-btn").addEventListener("click",  () => programmeModal.close());
+document.getElementById("programme-cancel-btn").addEventListener("click", () => programmeModal.close());
 
 document.getElementById("programme-form").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -886,19 +886,19 @@ document.getElementById("programme-form").addEventListener("submit", async (e) =
   clearFieldErrs("prog-title-err", "prog-desc-err", "prog-dur-err", "prog-img-err");
 
   const f = e.target;
-  let ok  = true;
+  let ok = true;
 
-  const title             = f.title.value.trim();
-  const shortDescription  = f.shortDescription.value.trim();
-  const description       = f.description.value.trim();
-  const level             = f.level.value;
-  const durationYears     = parseInt(f.durationYears.value, 10);
-  const isPublished       = f.isPublished.checked;
+  const title = f.title.value.trim();
+  const shortDescription = f.shortDescription.value.trim();
+  const description = f.description.value.trim();
+  const level = f.level.value;
+  const durationYears = parseInt(f.durationYears.value, 10);
+  const isPublished = f.isPublished.checked;
   const programmeLeaderId = f.programmeLeaderId.value || null;
-  const imageUrl          = f.imageUrl.value.trim();
+  const imageUrl = f.imageUrl.value.trim();
 
-  if (!title)       { fieldErr("prog-title-err", "Title is required");       ok = false; }
-  if (!description) { fieldErr("prog-desc-err",  "Description is required"); ok = false; }
+  if (!title) { fieldErr("prog-title-err", "Title is required"); ok = false; }
+  if (!description) { fieldErr("prog-desc-err", "Description is required"); ok = false; }
   if (!durationYears || durationYears < 1 || durationYears > 10) {
     fieldErr("prog-dur-err", "Duration must be between 1 and 10 years"); ok = false;
   }
@@ -911,9 +911,9 @@ document.getElementById("programme-form").addEventListener("submit", async (e) =
     });
 
   const isEdit = programmeEditId !== null;
-  const label  = isEdit ? "Save Changes" : "Add Programme";
+  const label = isEdit ? "Save Changes" : "Add Programme";
   const method = isEdit ? "PUT" : "POST";
-  const path   = isEdit ? `/api/admin/programmes/${programmeEditId}` : "/api/admin/programmes";
+  const path = isEdit ? `/api/admin/programmes/${programmeEditId}` : "/api/admin/programmes";
 
   setBusy("programme-submit", true, label);
   try {
@@ -949,21 +949,18 @@ document.getElementById("programme-form").addEventListener("submit", async (e) =
   }
 });
 
-/* ══════════════════════════════════════════════════════════════════
-   PROGRAMME SUBSCRIBERS
-   ══════════════════════════════════════════════════════════════════ */
-const subsModal        = new Modal("subs-modal-bd");
-let   subsProgrammeId  = null;
-let   subsPage         = 1;
-let   subsActiveTab    = "tracked";
-const SUBS_LIMIT       = 15;
+const subsModal = new Modal("subs-modal-bd");
+let subsProgrammeId = null;
+let subsPage = 1;
+let subsActiveTab = "tracked";
+const SUBS_LIMIT = 15;
 
 document.getElementById("subs-modal-close").addEventListener("click", () => subsModal.close());
 
 function switchSubsTab(tab) {
   subsActiveTab = tab;
   ["tracked", "enquiries"].forEach((t) => {
-    const btn   = document.getElementById(`subs-tab-${t}`);
+    const btn = document.getElementById(`subs-tab-${t}`);
     const panel = document.getElementById(`subs-panel-${t}`);
     const active = t === tab;
     btn.classList.toggle("is-active", active);
@@ -972,17 +969,17 @@ function switchSubsTab(tab) {
   });
 }
 
-document.getElementById("subs-tab-tracked").addEventListener("click",   () => switchSubsTab("tracked"));
+document.getElementById("subs-tab-tracked").addEventListener("click", () => switchSubsTab("tracked"));
 document.getElementById("subs-tab-enquiries").addEventListener("click", () => { switchSubsTab("enquiries"); loadEnquiries(); });
 
 async function onViewSubscribers(programmeId) {
   subsProgrammeId = programmeId;
-  subsPage        = 1;
+  subsPage = 1;
   switchSubsTab("tracked");
   document.getElementById("subs-table-body").innerHTML =
     `<tr class="data-table__loading"><td colspan="4" aria-live="polite">Loading…</td></tr>`;
   document.getElementById("subs-count-label").textContent = "";
-  document.getElementById("subs-pagination").innerHTML    = "";
+  document.getElementById("subs-pagination").innerHTML = "";
   document.getElementById("enq-table-body").innerHTML =
     `<tr class="data-table__loading"><td colspan="5" aria-live="polite">Loading…</td></tr>`;
   document.getElementById("enq-count-label").textContent = "";
@@ -993,7 +990,7 @@ async function onViewSubscribers(programmeId) {
 async function loadSubscribers() {
   const qs = new URLSearchParams({ page: subsPage, limit: SUBS_LIMIT });
   try {
-    const res  = await AuthState.apiFetch(`/api/admin/programmes/${subsProgrammeId}/subscribers?${qs}`);
+    const res = await AuthState.apiFetch(`/api/admin/programmes/${subsProgrammeId}/subscribers?${qs}`);
     const data = await res.json();
     if (!res.ok) { renderSubscribersError(data.error ?? "Failed to load."); return; }
     renderSubscribers(data);
@@ -1003,11 +1000,11 @@ async function loadSubscribers() {
 }
 
 function renderSubscribers({ programme, subscribers, total, page, pages }) {
-  document.getElementById("subs-modal-title").textContent    = "Subscribers";
+  document.getElementById("subs-modal-title").textContent = "Subscribers";
   document.getElementById("subs-programme-name").textContent = programme.title;
-  document.getElementById("subs-count-label").textContent    =
+  document.getElementById("subs-count-label").textContent =
     total === 0 ? "No tracked students yet."
-    : `${total} tracked student${total !== 1 ? "s" : ""}`;
+      : `${total} tracked student${total !== 1 ? "s" : ""}`;
 
   const tbody = document.getElementById("subs-table-body");
   if (!subscribers.length) {
@@ -1045,7 +1042,7 @@ function renderSubscribers({ programme, subscribers, total, page, pages }) {
 
 async function loadEnquiries() {
   try {
-    const res  = await AuthState.apiFetch(`/api/admin/programmes/${subsProgrammeId}/enquiries`);
+    const res = await AuthState.apiFetch(`/api/admin/programmes/${subsProgrammeId}/enquiries`);
     const data = await res.json();
     if (!res.ok) { renderEnquiriesError(data.error ?? "Failed to load."); return; }
     renderEnquiries(data);
@@ -1065,7 +1062,7 @@ function renderEnquiries({ enquiries, total }) {
   }
   tbody.innerHTML = enquiries.map((e) => {
     const name = [e.firstName, e.lastName].filter(Boolean).join(" ") || "—";
-    const msg  = e.message ? escHtml(e.message).slice(0, 60) + (e.message.length > 60 ? "…" : "") : "—";
+    const msg = e.message ? escHtml(e.message).slice(0, 60) + (e.message.length > 60 ? "…" : "") : "—";
     return `
       <tr>
         <td>
@@ -1176,25 +1173,25 @@ document.getElementById("enq-table-body").addEventListener("click", async (e) =>
 document.getElementById("subs-export-btn").addEventListener("click", async () => {
   if (!subsProgrammeId) return;
   const btn = document.getElementById("subs-export-btn");
-  btn.disabled    = true;
+  btn.disabled = true;
   btn.textContent = "Exporting…";
   try {
     const res = await AuthState.apiFetch(
       `/api/admin/programmes/${subsProgrammeId}/subscribers/export`
     );
     if (!res.ok) { showToast("Export failed.", "error"); return; }
-    const blob     = await res.blob();
-    const url      = URL.createObjectURL(blob);
-    const a        = document.createElement("a");
-    a.href         = url;
-    a.download     = `subscribers-${subsProgrammeId}.csv`;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `subscribers-${subsProgrammeId}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   } catch (e) {
     if (!(e instanceof AuthRedirectError)) showToast("Export failed.", "error");
   } finally {
-    btn.disabled    = false;
-    btn.innerHTML   = `<svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Export Emails`;
+    btn.disabled = false;
+    btn.innerHTML = `<svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Export Emails`;
   }
 });
 
@@ -1220,7 +1217,7 @@ function clearGlobalErr(id) {
 function setBusy(btnId, busy, label) {
   const btn = document.getElementById(btnId);
   if (!btn) return;
-  btn.disabled    = busy;
+  btn.disabled = busy;
   btn.textContent = busy ? "Saving…" : label;
 }
 function isValidHttpUrl(s) {
@@ -1231,7 +1228,7 @@ function apiFetch(method, path, body) {
   return AuthState.apiFetch(path, {
     method,
     headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify(body),
+    body: JSON.stringify(body),
   });
 }
 

@@ -1,11 +1,11 @@
 "use strict";
 
-let programmes     = [];
-let subscribedIds  = new Set();
-let searchQuery    = "";
-let levelFilter    = "ALL";
+let programmes = [];
+let subscribedIds = new Set();
+let searchQuery = "";
+let levelFilter = "ALL";
 let modalTriggerEl = null;
-let _searchTimer   = null;
+let _searchTimer = null;
 
 function escHtml(str) {
   return String(str)
@@ -41,9 +41,9 @@ async function trackProgramme(programmeId) {
 
   try {
     const res = await AuthState.apiFetch("/api/subscriptions", {
-      method:  "POST",
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ programmeId }),
+      body: JSON.stringify({ programmeId }),
     });
     if (res.ok || res.status === 409) {
       subscribedIds.add(programmeId);
@@ -99,7 +99,7 @@ function renderProgrammes() {
       const multiYear = years.length > 1;
       modulesHtml = years.map((y) => {
         const header = multiYear
-          ? `</ul><p class="prog-modules-year-label">Year ${y}</p><ul class="prog-modules-grid" aria-label="Year ${y} modules">`
+          ? `</ul><p class="prog-modules-year-label">Year ${y}</p><ul class="prog-modules-grid prog-year-grid" aria-label="Year ${y} modules">`
           : "";
         return header + byYear.get(y).map(moduleCardHtml).join("");
       }).join("");
@@ -108,9 +108,9 @@ function renderProgrammes() {
 
     /* Programme leader */
     const leaderHtml = p.leader ? (() => {
-      const name    = [p.leader.firstName, p.leader.lastName].filter(Boolean).join(" ");
+      const name = [p.leader.firstName, p.leader.lastName].filter(Boolean).join(" ");
       const initStr = ((p.leader.firstName?.[0] ?? "") + (p.leader.lastName?.[0] ?? "")).toUpperCase();
-      const avatar  = p.leader.imageUrl
+      const avatar = p.leader.imageUrl
         ? `<img class="prog-leader__avatar" src="${escHtml(p.leader.imageUrl)}" alt="">`
         : `<span class="prog-leader__avatar prog-leader__avatar--initials" aria-hidden="true">${escHtml(initStr)}</span>`;
       return `
@@ -153,6 +153,11 @@ function renderProgrammes() {
             <p class="programme-card__modules-label">Core Modules</p>
             <ul class="prog-modules-grid" aria-label="Core modules for ${escHtml(p.title)}">${modulesHtml}</ul>
             <div class="programme-card__actions">
+              
+            </div>
+
+          </div>
+          <div class="contact-us-wrapper">
               <button
                 class="btn btn--interest"
                 id="contact-btn-${p.id}"
@@ -163,7 +168,6 @@ function renderProgrammes() {
               </button>
               ${trackBtnHtml(p.id)}
             </div>
-          </div>
         </div>
       </li>
     `;
@@ -186,18 +190,18 @@ function renderProgrammes() {
 }
 
 function toggleCard(id) {
-  const card    = document.getElementById(`card-${id}`);
+  const card = document.getElementById(`card-${id}`);
   const trigger = document.getElementById(`trigger-${id}`);
-  const body    = document.getElementById(`body-${id}`);
-  const isOpen  = card.classList.contains("is-open");
+  const body = document.getElementById(`body-${id}`);
+  const isOpen = card.classList.contains("is-open");
 
-  /* Close all open cards first */
-  document.querySelectorAll(".programme-card.is-open").forEach((c) => {
-    const t = c.querySelector(".programme-card__trigger");
-    const b = c.querySelector(".programme-card__body");
-    c.classList.remove("is-open");
-    t.setAttribute("aria-expanded", "false");
-    b.setAttribute("aria-hidden", "true");
+  /* Close all open cards */
+  document.querySelectorAll(".programme-card.is-open").forEach((card) => {
+    const trigger = card.querySelector(".programme-card__trigger");
+    const body = card.querySelector(".programme-card__body");
+    card.classList.remove("is-open");
+    trigger.setAttribute("aria-expanded", "false");
+    body.setAttribute("aria-hidden", "true");
   });
 
   if (!isOpen) {
@@ -212,9 +216,9 @@ function toggleCard(id) {
 }
 
 function readUrlParams() {
-  const p = new URLSearchParams(window.location.search);
-  searchQuery = p.get("search") ?? "";
-  levelFilter = p.get("level")  ?? "ALL";
+  const params = new URLSearchParams(window.location.search);
+  searchQuery = params.get("search") ?? "";
+  levelFilter = params.get("level") ?? "ALL";
 }
 
 function syncFormFields() {
@@ -224,8 +228,8 @@ function syncFormFields() {
 
 function navigate() {
   const p = new URLSearchParams();
-  if (searchQuery)           p.set("search", searchQuery);
-  if (levelFilter !== "ALL") p.set("level",  levelFilter);
+  if (searchQuery) p.set("search", searchQuery);
+  if (levelFilter !== "ALL") p.set("level", levelFilter);
   const qs = p.toString();
   history.replaceState(null, "", qs ? `?${qs}` : location.pathname);
   loadProgrammes();
@@ -239,7 +243,7 @@ function updateCount() {
 }
 
 const backdrop = document.getElementById("modal-backdrop");
-const modal    = document.getElementById("contact-modal");
+const modal = document.getElementById("contact-modal");
 
 function openModal(programmeId, programmeTitle, triggerEl) {
   modalTriggerEl = triggerEl;
@@ -284,7 +288,7 @@ function trapFocus(e, container) {
     )
   );
   const first = focusable[0];
-  const last  = focusable[focusable.length - 1];
+  const last = focusable[focusable.length - 1];
 
   if (e.shiftKey && document.activeElement === first) {
     e.preventDefault();
@@ -296,11 +300,11 @@ function trapFocus(e, container) {
 }
 
 function validateForm() {
-  const form   = document.getElementById("contact-form");
+  const form = document.getElementById("contact-form");
   const fields = {
     firstName: { el: form.elements.firstName, error: "error-first-name", msg: "First name is required." },
-    lastName:  { el: form.elements.lastName,  error: "error-last-name",  msg: "Last name is required."  },
-    email:     { el: form.elements.email,     error: "error-email",      msg: "A valid email address is required." },
+    lastName: { el: form.elements.lastName, error: "error-last-name", msg: "Last name is required." },
+    email: { el: form.elements.email, error: "error-email", msg: "A valid email address is required." },
   };
 
   let valid = true;
@@ -361,14 +365,13 @@ backdrop.addEventListener("click", (e) => {
   if (e.target === backdrop) closeModal();
 });
 
-/* Keyboard — contact modal */
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    if (backdrop.classList.contains("is-open"))     closeModal();
+    if (backdrop.classList.contains("is-open")) closeModal();
     if (authBackdrop.classList.contains("is-open")) closeAuthModal();
   }
   if (e.key === "Tab") {
-    if (backdrop.classList.contains("is-open"))     trapFocus(e, modal);
+    if (backdrop.classList.contains("is-open")) trapFocus(e, modal);
     if (authBackdrop.classList.contains("is-open")) trapFocus(e, authModal);
   }
 });
@@ -379,18 +382,18 @@ document.getElementById("contact-form").addEventListener("submit", async (e) => 
   if (!validateForm()) return;
 
   const submitBtn = e.target.querySelector("[type=submit]");
-  const origText  = submitBtn.textContent;
-  submitBtn.disabled    = true;
+  const origText = submitBtn.textContent;
+  submitBtn.disabled = true;
   submitBtn.textContent = "Submitting…";
 
-  const data        = Object.fromEntries(new FormData(e.target));
+  const data = Object.fromEntries(new FormData(e.target));
   const programmeId = Number(e.target.dataset.programmeId);
 
   try {
-    const res  = await fetch("/api/contact", {
-      method:  "POST",
+    const res = await fetch("/api/contact", {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ ...data, programmeId }),
+      body: JSON.stringify({ ...data, programmeId }),
     });
     const json = await res.json();
 
@@ -398,7 +401,7 @@ document.getElementById("contact-form").addEventListener("submit", async (e) => 
       const banner = e.target.querySelector(".contact-server-error") ?? (() => {
         const el = document.createElement("p");
         el.className = "contact-server-error form-error";
-        el.style.textAlign    = "center";
+        el.style.textAlign = "center";
         el.style.marginBottom = "0.5rem";
         e.target.prepend(el);
         return el;
@@ -418,7 +421,7 @@ document.getElementById("contact-form").addEventListener("submit", async (e) => 
   } catch {
     alert("Network error. Please try again.");
   } finally {
-    submitBtn.disabled    = false;
+    submitBtn.disabled = false;
     submitBtn.textContent = origText;
   }
 });
@@ -430,8 +433,8 @@ window.addEventListener("scroll", () => {
 }, { passive: true });
 
 const authBackdrop = document.getElementById("auth-backdrop");
-const authModal    = document.getElementById("auth-modal");
-let   authTrigger  = null;
+const authModal = document.getElementById("auth-modal");
+let authTrigger = null;
 
 function openAuthModal() {
   authTrigger = document.activeElement;
@@ -513,10 +516,10 @@ async function submitAuthForm(endpoint, data, submitBtn) {
 
   try {
     const res = await fetch(endpoint, {
-      method:      "POST",
+      method: "POST",
       credentials: "include",
-      headers:     { "Content-Type": "application/json" },
-      body:        JSON.stringify(data),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
     });
     const json = await res.json();
 
@@ -570,7 +573,7 @@ async function loadSubscriptions() {
 }
 
 async function loadProgrammes() {
-  const list  = document.getElementById("programme-list");
+  const list = document.getElementById("programme-list");
   const count = document.getElementById("programmes-count");
   const empty = document.getElementById("programmes-empty");
 
@@ -579,8 +582,8 @@ async function loadProgrammes() {
   empty.hidden = true;
 
   const p = new URLSearchParams();
-  if (searchQuery)           p.set("search", searchQuery);
-  if (levelFilter !== "ALL") p.set("level",  levelFilter);
+  if (searchQuery) p.set("search", searchQuery);
+  if (levelFilter !== "ALL") p.set("level", levelFilter);
   const qs = p.toString();
 
   try {
