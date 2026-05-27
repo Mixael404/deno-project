@@ -1,4 +1,4 @@
-import { userModel }    from "../models/userModel.js";
+import { userModel } from "../models/userModel.js";
 import { sessionModel } from "../models/sessionModel.js";
 import { hashPassword, verifyPassword } from "../utils/hash.js";
 import { createAccessToken, generateRefreshToken, refreshExpiresAt } from "../utils/jwt.js";
@@ -18,13 +18,17 @@ function safeUser(user) {
 export const authController = {
   async register(req) {
     let body;
-    try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+    try { 
+      body = await req.json(); 
+    } catch { 
+      return json({ error: "Invalid JSON" }, 400); 
+    }
 
     const firstName = sanitizeName(body?.firstName);
-    const lastName  = sanitizeName(body?.lastName);
-    const email     = sanitizeEmail(body?.email);
-    const password  = sanitizePassword(body?.password);
-    const phone     = sanitizePhone(body?.phone);
+    const lastName = sanitizeName(body?.lastName);
+    const email = sanitizeEmail(body?.email);
+    const password = sanitizePassword(body?.password);
+    const phone = sanitizePhone(body?.phone);
 
     if (!firstName || !lastName || !email || !password) {
       return json({ error: "firstName, lastName, email and password are required" }, 400);
@@ -40,10 +44,10 @@ export const authController = {
     }
 
     const passwordHash = await hashPassword(password);
-    const user         = userModel.create({ email, passwordHash, role: "STUDENT", firstName, lastName, phone });
+    const user = userModel.create({ email, passwordHash, role: "STUDENT", firstName, lastName, phone });
     const refreshToken = generateRefreshToken();
-    const session      = sessionModel.create({ userId: user.id, refreshToken, expiresAt: refreshExpiresAt() });
-    const accessToken  = await createAccessToken(user.id, user.role, session.id);
+    const session = sessionModel.create({ userId: user.id, refreshToken, expiresAt: refreshExpiresAt() });
+    const accessToken = await createAccessToken(user.id, user.role, session.id);
 
     const headers = new Headers();
     setAuthCookies(headers, accessToken, refreshToken);
@@ -52,9 +56,13 @@ export const authController = {
 
   async login(req) {
     let body;
-    try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+    try { 
+      body = await req.json(); 
+    } catch { 
+      return json({ error: "Invalid JSON" }, 400); 
+    }
 
-    const email    = sanitizeEmail(body?.email);
+    const email = sanitizeEmail(body?.email);
     const password = sanitizePassword(body?.password);
 
     if (!email || !password) {
@@ -62,15 +70,15 @@ export const authController = {
     }
 
     const user = userModel.findByEmail(email);
-    // Always run verifyPassword to prevent timing-based user enumeration.
+    
     const isValidPw = await verifyPassword(password, user?.passwordHash ?? ":");
     if (!user || !isValidPw) {
       return json({ error: "Invalid credentials" }, 401);
     }
 
     const refreshToken = generateRefreshToken();
-    const session      = sessionModel.create({ userId: user.id, refreshToken, expiresAt: refreshExpiresAt() });
-    const accessToken  = await createAccessToken(user.id, user.role, session.id);
+    const session = sessionModel.create({ userId: user.id, refreshToken, expiresAt: refreshExpiresAt() });
+    const accessToken = await createAccessToken(user.id, user.role, session.id);
 
     const headers = new Headers();
     setAuthCookies(headers, accessToken, refreshToken);
